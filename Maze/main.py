@@ -1,37 +1,52 @@
 from calendar import c
+from glob import glob
 from queue import Empty
 import numpy as np
 import time
 
 # Variable Declare
-my_grid=[]
-invalid_indices=[]
-grid_size=11
-nr_of_ghosts=0
+my_grid=[]              # To store grid
+invalid_indices=[]      # To store indices which are blocked, and where ghost cannot pop up
+grid_size=11            # Size of the grid
+nr_of_ghosts=10          # Number of the ghosts to conjure
 
 # To create the grid
 def create_grid(grid_size, blocked_cell=0.28):
-    #while :
-    my_grid = np.random.rand(grid_size,grid_size)
-    my_grid = np.where(my_grid<=blocked_cell, 1, 0)
-    my_grid[0][0]=0
-    my_grid[grid_size-1, grid_size-1] = 0
-    print(my_grid)
-    print(depth_first_search(my_grid))
-    #if depth_first_search(my_grid):
-    #    break
-    #time.sleep(200)
+    while True:
+        my_grid = np.random.rand(grid_size,grid_size)
+        # Populates grid with 1 (Blocked cell) and 0 (Unblocked cell) based on probability given by blocked_cell.        
+        my_grid = np.where(my_grid<=blocked_cell, 1, 0)
+        # Start position and goal must be unblocked
+        my_grid[0][0]=0
+        my_grid[grid_size-1, grid_size-1] = 0
+        print(my_grid)
+        # To check using Depth First Search if grid has a path to reach from the start to the goal
+        if (depth_first_search(my_grid, grid_size-1, grid_size-1)):
+            break
     return my_grid
 
 
-# To get Ghost Cell, on which ghost can be spawned.
+# To get randomly generated coordinates to spawn ghosts.
 def get_ghost_cell_index():
     while True:
         row_index = np.random.randint(0, grid_size)
         column_index = np.random.randint(0, grid_size)
+        print('Random coordinate of Ghost populated : '+str(row_index)+','+str(column_index))
+        # Checks if the randomly generated coordinates is not within invalid_indices, and then returns the coordinates. 
         if (row_index, column_index) not in invalid_indices:
+            print('Ghost populated')
             return row_index, column_index
-    
+
+# This function will call get_ghost_cell_index() to create ghosts based on number of ghosts received.
+def place_ghosts(num_ghosts):
+    global invalid_indices
+    for i in range(num_ghosts):
+        row_ind, col_ind = get_ghost_cell_index()
+        my_grid[row_ind][col_ind] = -1
+        invalid_indices = np.append(invalid_indices, [[row_ind, col_ind]], axis=0)
+        invalid_indices = invalid_indices.tolist()
+    print('Invalid Indices : ' + str(invalid_indices))
+    return my_grid   
 
 def set_invalid_indices():
     invalid_indices = np.argwhere(my_grid == 1)
@@ -39,19 +54,14 @@ def set_invalid_indices():
     invalid_indices = np.append(invalid_indices, [[grid_size-1, grid_size-1]], axis=0)
     return invalid_indices
 
-def place_ghosts(num_ghosts):
-    for i in range(num_ghosts):
-        row_ind, col_ind = get_ghost_cell_index()
-        my_grid[row_ind][col_ind] = -1
-    return my_grid
-
-def depth_first_search(my_grid):
-    start=[0,0]
-    fringe=[start]
-    print('Fringe : '+str(fringe) + str(type(fringe)))
+# Depth First Search algorithm
+def depth_first_search(my_grid, goal_x, goal_y):
+    start = [0,0]
+    fringe = [start]
+    print('Fringe : '+ str(fringe) + str(type(fringe)))
     print('Start : '+ str(start) + str(type(start)))
-    explored=[start]
-    i=0
+    explored = [start]
+    i=0     # can be deleted later, just a safety mechanism to analyze infinite loops
     try:
         while len(fringe) > 0:
             currCell = fringe.pop()
@@ -60,7 +70,7 @@ def depth_first_search(my_grid):
             if currCell not in explored:            # to solve the issue where code was revisiting already explored cells
                 explored.append(currCell)
             #explored.append(nextCell)      # when was this appended? Unsure
-            if currCell == [grid_size-1,grid_size-1]:
+            if currCell == [goal_x, goal_y]:
                 print('Path exists')
                 print('Fringe : '+str(fringe))
                 print('Explored Path : '+str(explored))
@@ -103,8 +113,9 @@ def depth_first_search(my_grid):
             #fringe.append(nextCell)
             print('Fringe : '+str(fringe))
             print('Explored : '+str(explored))
+             # can be deleted later, just a safety mechanism to analyze infinite loops
             i=i+1
-            if i>50:
+            if i>200:
                 print('Value of i is more than threshold')
                 return False
         else:
@@ -122,4 +133,3 @@ invalid_indices = set_invalid_indices()
 invalid_indices = invalid_indices.tolist()
 my_grid = place_ghosts(nr_of_ghosts)
 print(my_grid)
-#depth_first_search(my_grid)
