@@ -7,8 +7,8 @@ import time
 # Variable Declare
 my_grid=[]              # To store grid
 invalid_indices=[]      # To store indices which are blocked, and where ghost cannot pop up
-grid_size=11            # Size of the grid
-nr_of_ghosts=5          # Number of the ghosts to conjure
+grid_size=10            # Size of the grid
+nr_of_ghosts=10          # Number of the ghosts to conjure
 
 # To create the grid
 def create_grid(grid_size, blocked_cell=0.28):
@@ -51,9 +51,10 @@ def place_ghosts(num_ghosts):
     global invalid_indices
     for i in range(num_ghosts):
         row_ind, col_ind = get_ghost_cell_index()
-        my_grid[row_ind][col_ind] = -1
-        invalid_indices = np.append(invalid_indices, [[row_ind, col_ind]], axis=0)
-        invalid_indices = invalid_indices.tolist()
+        my_grid[row_ind][col_ind] = my_grid[row_ind][col_ind] - 10
+        print(my_grid)
+        # invalid_indices = np.append(invalid_indices, [[row_ind, col_ind]], axis=0)
+        # invalid_indices = invalid_indices.tolist()
     #print('Invalid Indices : ' + str(invalid_indices))
     return my_grid   
 
@@ -87,28 +88,28 @@ def depth_first_search(my_grid, goal_x, goal_y):
             # write code to check each side : LUDR and check if not going array out of bounds
             # Code to select nextCell as Left
             if currCell[1] != 0:
-                if my_grid[currCell[0], (currCell[1] - 1)] == 0:
+                if (my_grid[currCell[0], (currCell[1] - 1)] % 10) == 0:
                     nextCell = [currCell[0], (currCell[1] - 1)]
                     if nextCell not in explored:
                         fringe.append(nextCell)
                     #print('In first loop')
             # Code to select nextCell as Up
             if currCell[0] != 0:
-                if my_grid[(currCell[0] - 1), currCell[1]] == 0:
+                if (my_grid[(currCell[0] - 1), currCell[1]] % 10) == 0:
                     nextCell = [(currCell[0] - 1), currCell[1]]
                     if nextCell not in explored:
                         fringe.append(nextCell)
                     #print('In sec loop')
             # Code to select nextCell as Down
             if currCell[0] != (grid_size - 1):
-                if my_grid[currCell[0] + 1, currCell[1]] == 0:
+                if (my_grid[currCell[0] + 1, currCell[1]] % 10) == 0:
                     nextCell = [(currCell[0] + 1), currCell[1]]
                     if nextCell not in explored:
                         fringe.append(nextCell)
                     #print('In third loop')
             # Code to select nextCell as Right
             if currCell[1] != (grid_size - 1):
-                if my_grid[currCell[0], currCell[1] + 1] == 0:
+                if (my_grid[currCell[0], currCell[1] + 1] % 10) == 0:
                     nextCell = [currCell[0], (currCell[1] + 1)]
                     if nextCell not in explored:
                         fringe.append(nextCell)
@@ -135,11 +136,14 @@ def depth_first_search(my_grid, goal_x, goal_y):
         print(error111)
         return False
         
-        
 
-my_grid= create_grid(grid_size)
-invalid_indices = set_invalid_indices()
-invalid_indices = invalid_indices.tolist()
-print('Invalid Indices: ' + str(invalid_indices))
-my_grid = place_ghosts(nr_of_ghosts)
-print(my_grid)
+def create_env():
+    global my_grid, invalid_indices
+    my_grid = create_grid(grid_size)
+    invalid_indices = set_invalid_indices()
+    invalid_indices = invalid_indices.tolist()
+    print('Invalid Indices: ' + str(invalid_indices))
+    my_grid = place_ghosts(nr_of_ghosts)
+    # print(my_grid)
+
+create_env()
