@@ -7,8 +7,8 @@ import time
 # Variable Declare
 my_grid=[]              # To store grid
 invalid_indices=[]      # To store indices which are blocked, and where ghost cannot pop up
-grid_size=11            # Size of the grid
-nr_of_ghosts=5          # Number of the ghosts to conjure
+grid_size=7            # Size of the grid
+nr_of_ghosts=3          # Number of the ghosts to conjure
 
 # To create the grid
 def create_grid(grid_size, blocked_cell=0.28):
