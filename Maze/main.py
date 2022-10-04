@@ -7,8 +7,8 @@ import time
 # Variable Declare
 my_grid=[]              # To store grid
 invalid_indices=[]      # To store indices which are blocked, and where ghost cannot pop up
-grid_size=10            # Size of the grid
-nr_of_ghosts=10          # Number of the ghosts to conjure
+grid_size=4            # Size of the grid
+nr_of_ghosts=3          # Number of the ghosts to conjure
 
 # To create the grid
 def create_grid(grid_size, blocked_cell=0.28):
@@ -135,6 +135,94 @@ def depth_first_search(my_grid, goal_x, goal_y):
         print('No path present')
         print(error111)
         return False
+
+# Breadth First Search algorithm
+def breadth_first_search(my_grid, goal_x=grid_size-1, goal_y=grid_size-1, start_x=0, start_y=0):
+    print('In BFS')
+    start = [start_x, start_y]
+    fringe = [start]
+    print('Fringe : '+ str(fringe) + str(type(fringe)))
+    print('Start : '+ str(start) + str(type(start)))
+    explored = [start]
+    bfs_path = {}
+    pathFwd = {}
+    startTuple = (start_x,start_y)
+    i=0     # can be deleted later, just a safety mechanism to analyze infinite loops
+    # try:
+    while len(fringe) > 0:
+        currCell = fringe.pop(0)
+        print('Fringe : '+str(fringe))
+        print('currcell : ' + str(currCell) + str(type(currCell)))
+        if currCell not in explored:            # to solve the issue where code was revisiting already explored cells
+            explored.append(currCell)
+        #explored.append(nextCell)      # when was this appended? Unsure
+        if currCell == [goal_x, goal_y]:
+            print('Path exists')
+            print('Final Fringe : '+str(fringe))
+            print('Explored Path : '+str(explored))
+            print('BFS_Path : '+str(bfs_path))
+            path_xy = (goal_x, goal_y)
+            while path_xy != startTuple:
+                pathFwd[bfs_path[path_xy]] = path_xy
+                path_xy = bfs_path[path_xy]
+                print('PathFwd : '+str(pathFwd))
+            return pathFwd
+        # write code to check each side : LUDR and check if not going array out of bounds
+        # Code to select nextCell as Left
+        if currCell[1] != 0:
+            if (my_grid[currCell[0], (currCell[1] - 1)] % 10) == 0:
+                nextCell = [currCell[0], (currCell[1] - 1)]
+                if nextCell not in explored:
+                    fringe.append(nextCell)
+                print('In Left loop')
+        # Code to select nextCell as Up
+        if currCell[0] != 0:
+            if (my_grid[(currCell[0] - 1), currCell[1]] % 10) == 0:
+                nextCell = [(currCell[0] - 1), currCell[1]]
+                if nextCell not in explored:
+                    fringe.append(nextCell)
+                print('In Up loop')
+        # Code to select nextCell as Down
+        if currCell[0] != (grid_size - 1):
+            if (my_grid[currCell[0] + 1, currCell[1]] % 10) == 0:
+                nextCell = [(currCell[0] + 1), currCell[1]]
+                if nextCell not in explored:
+                    fringe.append(nextCell)
+                print('In Down loop')
+        # Code to select nextCell as Right
+        if currCell[1] != (grid_size - 1):
+            if (my_grid[currCell[0], currCell[1] + 1] % 10) == 0:
+                nextCell = [currCell[0], (currCell[1] + 1)]
+                if nextCell not in explored:
+                    fringe.append(nextCell)
+                print('In Right loop')
+        print('Fringe : '+str(fringe))
+        print('Explored : '+str(explored))
+        print('BFS Path : '+str(bfs_path))
+        if nextCell in explored:
+            print('if nextCell in explored Executed. nextCell : '+str(nextCell))
+            continue
+        if nextCell is None:
+            print('nextCell is not defined. Path probably does not exist')
+            return pathFwd
+        explored.append(nextCell)
+        bfs_path[tuple(nextCell)] = tuple(currCell)
+        #fringe.append(nextCell)        # Dont remember, useful?
+        print('Fringe : '+str(fringe))
+        print('Explored : '+str(explored))
+        print('BFS Path : '+str(bfs_path))
+        # can be deleted later, just a safety mechanism to analyze infinite loops
+        i=i+1
+        if i>200:
+            print('Value of i is more than threshold')
+            return pathFwd
+    else:
+        print('Path does not exist!')
+        return False
+    # except Exception as error111:
+    #     print('No path present')
+    #     print(error111)
+    #     return pathFwd
         
 
 def create_env():
@@ -147,3 +235,4 @@ def create_env():
     # print(my_grid)
 
 create_env()
+print(breadth_first_search(my_grid))
