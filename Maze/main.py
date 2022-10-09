@@ -545,13 +545,32 @@ if __name__=='__main__':
     create_env()
     print('Original Grid generated : ')
     print(my_grid)
-    my_grid_original = my_grid
+    my_grid_original = my_grid                  # To have a backup of original grid
     print('Copied above grid to my_grid_original :')
 
     # Agent 1 Traversing
     agentOneReached = agentOneTraversal()
     print('Agent One Reached : ' + str(agentOneReached))
     print(my_grid)
+
+    # Agent 1 Traversing
+    nr_of_ghosts=1
+    while True:                 # Loop to check till what number can the Agent survive
+        for i in range(1,10):
+            create_env()            # New Env everytime
+            agentOneReached = agentOneTraversal()       # Agent 1 Traversal path with A* Algorithm
+            print('Agent One Reached : ' + str(agentOneReached))
+            if nr_of_ghosts in a1Survivability:         # Dictionary containing results of Agent 1's Traversal success
+                a1Survivability[nr_of_ghosts].append(agentOneReached)
+            else:
+                a1Survivability[nr_of_ghosts] = [agentOneReached]
+            print(my_grid)
+        print(a1Survivability)
+        if True not in a1Survivability[nr_of_ghosts]:       # Loop must break if Agent 1's survivability is no more.
+            break
+        if nr_of_ghosts>30:         # A check to limit how many times loop will go on, safety mechanism
+            break
+        nr_of_ghosts+=1
 
 
 
