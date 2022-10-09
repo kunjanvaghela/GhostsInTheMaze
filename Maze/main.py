@@ -7,8 +7,8 @@ import time
 # Variable Declare
 my_grid=[]              # To store grid
 invalid_indices=[]      # To store indices which are blocked, and where ghost cannot pop up
-grid_size=4            # Size of the grid
-nr_of_ghosts=3          # Number of the ghosts to conjure
+grid_size=51           # Size of the grid
+nr_of_ghosts=13          # Number of the ghosts to conjure
 
 # To create the grid
 def create_grid(grid_size, blocked_cell=0.28):
@@ -136,6 +136,19 @@ def depth_first_search(my_grid, goal_x, goal_y):
         print(error111)
         return False
 
+
+def print_bfs_path(childToParentMapping, goalCell):
+    # childToParentMapping = {(1, 0): {(0, 0)}, (0, 1): {(0, 0)}, (2, 0): {(1, 0)}, (2, 1): {(2, 0)}, (3, 1): {(2, 1)}, (2, 2): {(2, 1)}, (2, 3): {(2, 2)}, (3, 3): {(2, 3)}}
+    # goalCell = (3,3)
+    curr = goalCell
+    path = []
+    path.append(goalCell)
+    while curr != (0,0):
+        val = childToParentMapping[curr]
+        curr = list(val)[0]
+        path.append(curr)
+    return path
+
 # Breadth First Search algorithm
 def breadth_first_search(my_grid, goal_x=grid_size-1, goal_y=grid_size-1, start_x=0, start_y=0):
     print('In BFS')
@@ -144,8 +157,9 @@ def breadth_first_search(my_grid, goal_x=grid_size-1, goal_y=grid_size-1, start_
     print('Fringe : '+ str(fringe) + str(type(fringe)))
     print('Start : '+ str(start) + str(type(start)))
     explored = [start]
-    bfs_path = {}
-    pathFwd = {}
+    childToParentMap = {}
+    # bfs_path = {}
+    # pathFwd = {}
     startTuple = (start_x,start_y)
     i=0     # can be deleted later, just a safety mechanism to analyze infinite loops
     # try:
@@ -160,19 +174,32 @@ def breadth_first_search(my_grid, goal_x=grid_size-1, goal_y=grid_size-1, start_
             print('Path exists')
             print('Final Fringe : '+str(fringe))
             print('Explored Path : '+str(explored))
-            print('BFS_Path : '+str(bfs_path))
+            # print('BFS_Path : '+str(bfs_path))
             path_xy = (goal_x, goal_y)
-            while path_xy != startTuple:
-                pathFwd[bfs_path[path_xy]] = path_xy
-                path_xy = bfs_path[path_xy]
-                print('PathFwd : '+str(pathFwd))
-            return pathFwd
+            # while path_xy != startTuple:
+                # pathFwd[bfs_path[path_xy]] = path_xy
+                # path_xy = bfs_path[path_xy]
+            #     print('PathFwd : '+str(pathFwd))
+            # return pathFwd
+            return print_bfs_path(childToParentMap, (goal_x,goal_y))
         # write code to check each side : LUDR and check if not going array out of bounds
         # Code to select nextCell as Left
         if currCell[1] != 0:
             if (my_grid[currCell[0], (currCell[1] - 1)] % 10) == 0:
                 nextCell = [currCell[0], (currCell[1] - 1)]
                 if nextCell not in explored:
+                    if (nextCell[0],nextCell[1]) in childToParentMap:
+                        if childToParentMap[(nextCell[0],nextCell[1])] is not None:
+                            val = childToParentMap[(nextCell[0],nextCell[1])].add((currCell[0],currCell[1]))
+                            childToParentMap[(nextCell[0],nextCell[1])] = val
+                        else:
+                            value = set()
+                            value.add((currCell[0],currCell[1]))
+                            childToParentMap[(nextCell[0],nextCell[1])] = value
+                    else:
+                        value = set()
+                        value.add((currCell[0],currCell[1]))
+                        childToParentMap[(nextCell[0],nextCell[1])] = value
                     fringe.append(nextCell)
                 print('In Left loop')
         # Code to select nextCell as Up
@@ -180,6 +207,18 @@ def breadth_first_search(my_grid, goal_x=grid_size-1, goal_y=grid_size-1, start_
             if (my_grid[(currCell[0] - 1), currCell[1]] % 10) == 0:
                 nextCell = [(currCell[0] - 1), currCell[1]]
                 if nextCell not in explored:
+                    if (nextCell[0],nextCell[1]) in childToParentMap:
+                        if childToParentMap[(nextCell[0],nextCell[1])] is not None:
+                            val = childToParentMap[(nextCell[0],nextCell[1])].add((currCell[0],currCell[1]))
+                            childToParentMap[(nextCell[0],nextCell[1])] = val
+                        else:
+                            value = set()
+                            value.add((currCell[0],currCell[1]))
+                            childToParentMap[(nextCell[0],nextCell[1])] = value
+                    else:
+                        value = set()
+                        value.add((currCell[0],currCell[1]))
+                        childToParentMap[(nextCell[0],nextCell[1])] = value
                     fringe.append(nextCell)
                 print('In Up loop')
         # Code to select nextCell as Down
@@ -187,6 +226,18 @@ def breadth_first_search(my_grid, goal_x=grid_size-1, goal_y=grid_size-1, start_
             if (my_grid[currCell[0] + 1, currCell[1]] % 10) == 0:
                 nextCell = [(currCell[0] + 1), currCell[1]]
                 if nextCell not in explored:
+                    if (nextCell[0],nextCell[1]) in childToParentMap:
+                        if childToParentMap[(nextCell[0],nextCell[1])] is not None:
+                            val = childToParentMap[(nextCell[0],nextCell[1])].add((currCell[0],currCell[1]))
+                            childToParentMap[(nextCell[0],nextCell[1])] = val
+                        else:
+                            value = set()
+                            value.add((currCell[0],currCell[1]))
+                            childToParentMap[(nextCell[0],nextCell[1])] = value
+                    else:
+                        value = set()
+                        value.add((currCell[0],currCell[1]))
+                        childToParentMap[(nextCell[0],nextCell[1])] = value
                     fringe.append(nextCell)
                 print('In Down loop')
         # Code to select nextCell as Right
@@ -194,28 +245,43 @@ def breadth_first_search(my_grid, goal_x=grid_size-1, goal_y=grid_size-1, start_
             if (my_grid[currCell[0], currCell[1] + 1] % 10) == 0:
                 nextCell = [currCell[0], (currCell[1] + 1)]
                 if nextCell not in explored:
+                    if (nextCell[0],nextCell[1]) in childToParentMap:
+                        if childToParentMap[(nextCell[0],nextCell[1])] is not None:
+                            val = childToParentMap[(nextCell[0],nextCell[1])].add((currCell[0],currCell[1]))
+                            childToParentMap[(nextCell[0],nextCell[1])] = val
+                        else:
+                            value = set()
+                            value.add((currCell[0],currCell[1]))
+                            childToParentMap[(nextCell[0],nextCell[1])] = value
+                    else:
+                        value = set()
+                        value.add((currCell[0],currCell[1]))
+                        childToParentMap[(nextCell[0],nextCell[1])] = value
                     fringe.append(nextCell)
                 print('In Right loop')
         print('Fringe : '+str(fringe))
         print('Explored : '+str(explored))
-        print('BFS Path : '+str(bfs_path))
+        # print('BFS Path : '+str(bfs_path))
         if nextCell in explored:
             print('if nextCell in explored Executed. nextCell : '+str(nextCell))
             continue
         if nextCell is None:
             print('nextCell is not defined. Path probably does not exist')
-            return pathFwd
+            return print_bfs_path(childToParentMap, (goal_x,goal_y))
+            # return pathFwd
         explored.append(nextCell)
-        bfs_path[tuple(nextCell)] = tuple(currCell)
+        # bfs_path[tuple(nextCell)] = tuple(currCell)
         #fringe.append(nextCell)        # Dont remember, useful?
         print('Fringe : '+str(fringe))
         print('Explored : '+str(explored))
-        print('BFS Path : '+str(bfs_path))
+        # print('BFS Path : '+str(bfs_path))
         # can be deleted later, just a safety mechanism to analyze infinite loops
         i=i+1
-        if i>200:
+        print("VAL" + str(i))
+        if i>2000:
             print('Value of i is more than threshold')
-            return pathFwd
+            # return pathFwd
+            return print_bfs_path(childToParentMap, (goal_x,goal_y))
     else:
         print('Path does not exist!')
         return False
@@ -236,3 +302,5 @@ def create_env():
 
 create_env()
 print(breadth_first_search(my_grid))
+
+# print(print_bfs_path('a', 'b'))
