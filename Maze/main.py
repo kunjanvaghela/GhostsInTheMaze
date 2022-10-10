@@ -463,7 +463,7 @@ def ghostmovement():
                     #print('LEFT',my_grid[list[0]][list[1]-1]) 
                     my_grid[list[0]][list[1]]=my_grid[list[0]][list[1]]+10
                     my_grid[list[0]][list[1]-1]=my_grid[list[0]][list[1]-1]-10
-                    list[1]=list[0]-1
+                    list[1]=list[1]-1
                 elif (my_grid[list[0]][list[1]-1]==1 or my_grid[list[0]][list[1]-1]%10!=0) and (list[1]>0): #BLOCKED CELL
                     #print('LEFT',my_grid[list[0]][list[1]-1])
                     directionIfBlocked=np.random.randint(low=0, high=2) #0=Stay, 1 =Go inside the Block
@@ -471,7 +471,7 @@ def ghostmovement():
                         print('MOVE TO BLOCKED')
                         my_grid[list[0]][list[1]]=my_grid[list[0]][list[1]]+10
                         my_grid[list[0]][list[1]-1]=my_grid[list[0]][list[1]-1]-10
-                        list[1]=list[0]-1
+                        list[1]=list[1]-1
                     else: print('STAY @ CURRENT')#STAY -NO CHANGE IF WALL IS BLOCKED
                     
             elif direction==2 :#GO-UP
@@ -479,7 +479,7 @@ def ghostmovement():
                     #print('UP',my_grid[list[0]-1][list[1]])
                     my_grid[list[0]][list[1]]=my_grid[list[0]][list[1]]+10
                     my_grid[list[0]-1][list[1]]=my_grid[list[0]-1][list[1]]-10
-                    list[1]=list[1]-1
+                    list[0]=list[0]-1
                 elif (my_grid[list[0]-1][list[1]]==1 or my_grid[list[0]-1][list[1]]%10!=0) and (list[0]>0): #BLOCKED CELL
                     print('UP',my_grid[list[0]-1][list[1]])
                     directionIfBlocked=np.random.randint(low=0, high=2) #0=Stay, 1 =Go inside the Block
@@ -487,7 +487,7 @@ def ghostmovement():
                         print('MOVE TO BLOCKED')
                         my_grid[list[0]][list[1]]=my_grid[list[0]][list[1]]+10
                         my_grid[list[0]-1][list[1]]=my_grid[list[0]-1][list[1]]-10
-                        list[1]=list[1]-1
+                        list[0]=list[0]-1
                     else: print('STAY @ CURRENT')#STAY -NO CHANGE IF WALL IS BLOCKED
 
             # KV: Check for possible bugs as written in comment below - Ref:Bug01
@@ -496,7 +496,7 @@ def ghostmovement():
                     #print('DOWN',my_grid[list[0]+1][list[1]])
                     my_grid[list[0]][list[1]]=my_grid[list[0]][list[1]]+10
                     my_grid[list[0]+1][list[1]]=my_grid[list[0]+1][list[1]]-10
-                    list[1]=list[1]+1
+                    list[0]=list[0]+1
                 elif (my_grid[list[0]+1][list[1]]==1 or my_grid[list[0]+1][list[1]]%10!=0) and (list[0]<grid_size): #BLOCKED CELL   #KV: Changed from 'my_grid[list[0]][list[1]+1]==0' to 'my_grid[list[0]+1][list[1]]==0' - Ref:Bug01
                     #print('DOWN',my_grid[list[0]+1][list[1]])
                     directionIfBlocked=np.random.randint(low=0, high=2) #0=Stay, 1 =Go inside the Block
@@ -504,7 +504,7 @@ def ghostmovement():
                         print('MOVE TO BLOCKED')
                         my_grid[list[0]][list[1]]=my_grid[list[0]][list[1]]+10
                         my_grid[list[0]+1][list[1]]=my_grid[list[0]+1][list[1]]-10
-                        list[1]=list[1]+1
+                        list[0]=list[0]+1
                     else: print('STAY @ CURRENT')#STAY -NO CHANGE IF WALL IS BLOCKED
 
 
@@ -513,14 +513,14 @@ def ghostmovement():
                     #print('RIGHT',my_grid[list[0]][list[1]+1])
                     my_grid[list[0]][list[1]]=my_grid[list[0]][list[1]]+10
                     my_grid[list[0]][list[1]+1]=my_grid[list[0]][list[1]+1]-10
-                    list[1]=list[0]+1
+                    list[1]=list[1]+1
                 elif (my_grid[list[0]][list[1]+1]==1 or my_grid[list[0]][list[1]+1]%10!=0) and (list[1]<grid_size): #BLOCKED CELL
                     directionIfBlocked=np.random.randint(low=0, high=2) #0=Stay, 1 =Go inside the Block
                     if directionIfBlocked==1:
                         print('MOVE TO BLOCKED')
                         my_grid[list[0]][list[1]]=my_grid[list[0]][list[1]]+10
                         my_grid[list[0]][list[1]+1]=my_grid[list[0]][list[1]+1]-10
-                        list[1]=list[0]+1
+                        list[1]=list[1]+1
                     else: print('STAY @ CURRENT')#STAY -NO CHANGE IF WALL IS BLOCKED
     print('--------------------')        
 
