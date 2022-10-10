@@ -1,5 +1,6 @@
 from queue import Empty, PriorityQueue
 import numpy as np
+import math
 
 # Variable Declare
 my_grid=[]              # To store grid, changes when ghost traverses will happen in this directly.
@@ -412,7 +413,13 @@ def create_env():
 def ghostmovement():
     global my_grid
     #ghostPositionList=[[1,1],[2,3],[3,0],[3,1]]
-    ghostPositionList=np.argwhere(my_grid == -10)
+    ghostPositionList=np.argwhere(my_grid < 0)
+    for index in ghostPositionList:
+        no_of_ghosts=abs(math.ceil(my_grid[index[0],index[1]]/10))
+        while no_of_ghosts>1:
+            ghostPositionList.__add__(index)
+            no_of_ghosts=no_of_ghosts-1
+
     #ghostPositionList=[[1,1],[2,3]]
     print('OG GRID',my_grid)
     for list in ghostPositionList:              #for element in list:
