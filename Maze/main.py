@@ -6,7 +6,7 @@ import math
 my_grid=[]              # To store grid, changes when ghost traverses will happen in this directly.
 my_grid_original=[]     # To store original grid, with original position of ghosts
 invalid_indices=[]      # To store indices which are blocked, and where ghost cannot pop up
-grid_size=6            # Size of the grid
+grid_size=10           # Size of the grid
 nr_of_ghosts=1          # Number of the ghosts to conjure
 start_pos = (0,0)
 final_pos = (grid_size-1, grid_size-1)
