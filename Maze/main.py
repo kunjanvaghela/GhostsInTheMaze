@@ -8,13 +8,15 @@ import csv
 my_grid=[]              # To store grid, changes when ghost traverses will happen in this directly.
 my_grid_original=[]     # To store original grid, with original position of ghosts
 invalid_indices=[]      # To store indices which are blocked, and where ghost cannot pop up
-grid_size=7         # Size of the grid
-nr_of_ghosts=2          # Number of the ghosts to conjure
+grid_size=5            # Size of the grid
+nr_of_ghosts=1          # Number of the ghosts to conjure
 start_pos = (0,0)
 final_pos = (grid_size-1, grid_size-1)
 a1Survivability=dict()
 getAwayFromGhostRunCheck = 0
-agent2Path = dict()
+agent2PathAndMetric = dict()
+agent2For3 = dict()
+a2Mazes = dict()        #Dictionary with key as NoOfMazes, value as List of all mazes generated for Agent2
 
 # To create the grid
 def create_grid(grid_size, blocked_cell=0.28):
@@ -409,8 +411,12 @@ def aStar(gridd, ghost_check=0, start_x=0, start_y=0, goal_x=grid_size-1, goal_y
 
 
 def create_env():
-    global my_grid, invalid_indices
+    global my_grid, invalid_indices, a2Mazes
     my_grid = create_grid(grid_size)
+    if nr_of_ghosts in a2Mazes:
+        a2Mazes[nr_of_ghosts].append(my_grid)
+    else:
+        a2Mazes[nr_of_ghosts] = [my_grid]
     invalid_indices = set_invalid_indices()
     invalid_indices = invalid_indices.tolist()
     # print('Invalid Indices: ' + str(invalid_indices))
@@ -664,7 +670,7 @@ def getAwayFromGhost(currCell, nearestGhostPos):        # --> Returns tuple valu
 
 
 def agentTwoTraversal():
-    global agent2Path
+    global agent2PathAndMetric
     a2 = start_pos          # Agent 1 coordinates denoted by this variable
     nearestGhostPosition = tuple()
     while (a2 != final_pos):
@@ -675,6 +681,8 @@ def agentTwoTraversal():
             print('A Star path not present. Need to check for nearest ghost')
             nearestGhostPath = breadth_first_search(my_grid, 1, a2[0], a2[1])       # Returns list of path to ghost
             print('nearestGhostPath : ' + str(nearestGhostPath))
+            if len(nearestGhostPath) == 1:
+                return False
             nearestGhostPosition = nearestGhostPath[1]      # Checking the second path element
             print('nearestGhostPosition : ')
             print(nearestGhostPosition)
@@ -686,8 +694,8 @@ def agentTwoTraversal():
             nextLocA2 = aStarPathDetermined[a2]
         # Storing data of Agent 2 in path
         currCellToNextCellDirection = findDirection(a2, nextLocA2)
-        # if (a2[0], a2[1], currCellToNextCellDirection) in agent2Path:
-        agent2Path[(a2[0], a2[1], currCellToNextCellDirection)] = False
+        # if (a2[0], a2[1], currCellToNextCellDirection) in agent2PathAndMetric:
+        agent2PathAndMetric[(a2[0], a2[1], currCellToNextCellDirection)] = False
 
         # Movement of ghost initiated
         ghostmovement(my_grid)
@@ -703,6 +711,40 @@ def agentTwoTraversal():
         # break
     return True
 
+def writeAg2MetricForAg3(mazeNo, nr_of_ghost, agent2Dict):
+    #Metric: No. of ghosts, MazeNo, position[0], position[1], direction, wins, total
+    global agent2For3
+    masterKey = ()
+    masterVal = [0,0]
+    for key in agent2Dict.keys():
+        masterKey = (nr_of_ghost, key[0], key[1],key[2])
+        val = agent2Dict[key]
+        if masterKey in agent2For3:
+            currentMasterValue = agent2For3[masterKey]
+            if val:
+                currentMasterValue[0] += 1
+            currentMasterValue[1] += 1
+            agent2For3[masterKey] = currentMasterValue
+        else:
+            if val:
+                masterVal[0] = 1
+            masterVal[1] = 1
+            agent2For3[masterKey] = masterVal
+    
+    masterKeys = agent2For3.keys()
+    toWriteData = []
+    for key in masterKeys:
+        a1 = list(key)
+        a1 += list(agent2For3[key])
+        toWriteData.append(a1)  #No of ghosts, position[0], position[1], survivability, countOfTurns
+
+    print(toWriteData)
+    with open('a2DataTemp.csv', 'w', newline='') as file:
+        writer = csv.writer(file, delimiter=',')
+        writer.writerows(toWriteData)
+
+
+    file.close()
 
 if __name__=='__main__':
     create_env()
@@ -735,61 +777,40 @@ if __name__=='__main__':
     #         break
     #     nr_of_ghosts+=1
 
-    # # Agent 2 Traversal
-    # while True:                 # Loop to check till what number can the Agent survive
-    #     nr_of_ghosts = 5
-    #     agentTwoReached = agentTwoTraversal()
-    #     print('Agent Two Reached : ' + str(agentTwoReached))
-    #     print(my_grid)
-
-    # a2Survivability = {}
-    # while True:                 # Loop to check till what number can the Agent survive
-    #     for i in range(1,25):
-    #         create_env()            # New Env everytime
-    #         agentTwoReached = agentTwoTraversal()
-    #         print('Agent Two Reached : ' + str(agentTwoReached))
-    #         if nr_of_ghosts in a2Survivability:         # Dictionary containing results of Agent 1's Traversal success
-    #             a2Survivability[nr_of_ghosts].append(agentTwoReached)
-    #         else:
-    #             a2Survivability[nr_of_ghosts] = [agentTwoReached]
-    #         print(my_grid)
-    #     print(a2Survivability)
-    #     if True not in a2Survivability[nr_of_ghosts]:       # Loop must break if Agent 1's survivability is no more.
-    #         break
-    #     if nr_of_ghosts>30:         # A check to limit how many times loop will go on, safety mechanism
-    #         break
-    #     nr_of_ghosts+=1
-    
     #Metric:
-    #AgentNo, RunNo, No. of ghosts, Win/Loss, Time, Future-(No. of steps)
+    #AgentNo, RunNo, No. of ghosts, MazeNo, Win/Loss, Time, Future-(No. of steps)
     a2Survivability = {}
     a2Data = []
     a2RunNo = 1
     while True:                 # Loop to check till what number can the Agent survive
         for i in range(1,30):
             create_env()            # New Env everytime
-            startTime = time.time()
-            agentTwoReached = agentTwoTraversal()
-            print('Agent Two Reached : ' + str(agentTwoReached))
-            if agentTwoReached:
-                val = True
-                for keys in agent2Path:
-                    agent2Path[keys] = True
-            else:
-                val = False
-            if nr_of_ghosts in a2Survivability:         # Dictionary containing results of Agent 2's Traversal success
-                a2Survivability[nr_of_ghosts].append(val)
-            else:
-                a2Survivability[nr_of_ghosts] = [val]
-            executionTime = time.time() - startTime
-            a2Data.append(["A2", a2RunNo, nr_of_ghosts, val, executionTime])
-            a2RunNo+=1
-            print(my_grid)
-            print('agent2Path : '+ str(agent2Path))
+            for t in range(1,25):   # For each nr_of_ghost, each grid configuration, running agent 25 times.
+                startTime = time.time()
+                agentTwoReached = agentTwoTraversal()
+                print('Agent Two Reached : ' + str(agentTwoReached))
+                if agentTwoReached:
+                    val = True
+                    for keys in agent2PathAndMetric:
+                        agent2PathAndMetric[keys] = True
+                else:
+                    val = False
+                if nr_of_ghosts in a2Survivability:         # Dictionary containing results of Agent 2's Traversal success
+                    a2Survivability[nr_of_ghosts].append(val)
+                else:
+                    a2Survivability[nr_of_ghosts] = [val]
+                executionTime = time.time() - startTime
+                a2Data.append(["A2", a2RunNo, nr_of_ghosts, i, val, executionTime])
+                a2RunNo+=1
+                print(my_grid)
+                print('agent2PathAndMetric : '+ str(agent2PathAndMetric))
+                writeAg2MetricForAg3(i, nr_of_ghosts, agent2PathAndMetric)
+                agent2PathAndMetric = {}
         print(a2Survivability)
+
         if True not in a2Survivability[nr_of_ghosts]:       # Loop must break if Agent 2's survivability is no more.
             break
-        if nr_of_ghosts>10:         # A check to limit how many times loop will go on, safety mechanism
+        if nr_of_ghosts>100:         # A check to limit how many times loop will go on, safety mechanism
             break
         nr_of_ghosts+=1
 
