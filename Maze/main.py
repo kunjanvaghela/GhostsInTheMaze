@@ -8,12 +8,13 @@ import csv
 my_grid=[]              # To store grid, changes when ghost traverses will happen in this directly.
 my_grid_original=[]     # To store original grid, with original position of ghosts
 invalid_indices=[]      # To store indices which are blocked, and where ghost cannot pop up
-grid_size=15         # Size of the grid
+grid_size=7         # Size of the grid
 nr_of_ghosts=2          # Number of the ghosts to conjure
 start_pos = (0,0)
 final_pos = (grid_size-1, grid_size-1)
 a1Survivability=dict()
 getAwayFromGhostRunCheck = 0
+agent2Path = dict()
 
 # To create the grid
 def create_grid(grid_size, blocked_cell=0.28):
@@ -549,6 +550,17 @@ def ghostmovement(my_grid):
 
     #MANAN-END
 
+def findDirection(currCell, nextCellPos):        # --> Returns direction of the nextCell from current cell in integers: L:1 U:2 D:3 R:4:
+    if currCell[0] == (nextCellPos[0] + 1):     # Next Cell lies in Down direction
+        direction = 3
+    elif currCell[0] == (nextCellPos[0] - 1):     # Next Cell lies in Up direction
+        direction = 2
+    elif currCell[1] == (nextCellPos[1] + 1):     # Next Cell lies in Right direction
+        direction = 4
+    elif currCell[1] == (nextCellPos[1] - 1):     # Next Cell lies in Left direction
+        direction = 1
+    return direction
+
 def agentOneTraversal():
     a1 = start_pos          # Agent 1 coordinates denoted by this variable
     aStarPathDetermined = aStar(my_grid)
@@ -652,6 +664,7 @@ def getAwayFromGhost(currCell, nearestGhostPos):        # --> Returns tuple valu
 
 
 def agentTwoTraversal():
+    global agent2Path
     a2 = start_pos          # Agent 1 coordinates denoted by this variable
     nearestGhostPosition = tuple()
     while (a2 != final_pos):
@@ -671,6 +684,12 @@ def agentTwoTraversal():
                 return False
         else:
             nextLocA2 = aStarPathDetermined[a2]
+        # Storing data of Agent 2 in path
+        currCellToNextCellDirection = findDirection(a2, nextLocA2)
+        # if (a2[0], a2[1], currCellToNextCellDirection) in agent2Path:
+        agent2Path[(a2[0], a2[1], currCellToNextCellDirection)] = False
+
+        # Movement of ghost initiated
         ghostmovement(my_grid)
         print(nextLocA2)
         if my_grid[nextLocA2] == 1:
@@ -754,6 +773,8 @@ if __name__=='__main__':
             print('Agent Two Reached : ' + str(agentTwoReached))
             if agentTwoReached:
                 val = True
+                for keys in agent2Path:
+                    agent2Path[keys] = True
             else:
                 val = False
             if nr_of_ghosts in a2Survivability:         # Dictionary containing results of Agent 2's Traversal success
@@ -764,6 +785,7 @@ if __name__=='__main__':
             a2Data.append(["A2", a2RunNo, nr_of_ghosts, val, executionTime])
             a2RunNo+=1
             print(my_grid)
+            print('agent2Path : '+ str(agent2Path))
         print(a2Survivability)
         if True not in a2Survivability[nr_of_ghosts]:       # Loop must break if Agent 2's survivability is no more.
             break
