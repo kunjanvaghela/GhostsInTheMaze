@@ -1,16 +1,19 @@
 import math
 from queue import Empty, PriorityQueue
 import numpy as np
+import time
+import csv
 
 # Variable Declare
 my_grid=[]              # To store grid, changes when ghost traverses will happen in this directly.
 my_grid_original=[]     # To store original grid, with original position of ghosts
 invalid_indices=[]      # To store indices which are blocked, and where ghost cannot pop up
-grid_size=6            # Size of the grid
-nr_of_ghosts=6          # Number of the ghosts to conjure
+grid_size=15         # Size of the grid
+nr_of_ghosts=2          # Number of the ghosts to conjure
 start_pos = (0,0)
 final_pos = (grid_size-1, grid_size-1)
 a1Survivability=dict()
+getAwayFromGhostRunCheck = 0
 
 # To create the grid
 def create_grid(grid_size, blocked_cell=0.28):
@@ -140,13 +143,13 @@ def depth_first_search(my_grid, goal_x, goal_y):
         return False
 
 # For retrieving Path found from BFS Algo
-def print_bfs_path(childToParentMapping, goalCell):
+def print_bfs_path(childToParentMapping, goalCell, startCell):
     # childToParentMapping = {(1, 0): {(0, 0)}, (0, 1): {(0, 0)}, (2, 0): {(1, 0)}, (2, 1): {(2, 0)}, (3, 1): {(2, 1)}, (2, 2): {(2, 1)}, (2, 3): {(2, 2)}, (3, 3): {(2, 3)}}
     # goalCell = (3,3)
     curr = goalCell
     path = []
     path.append(goalCell)
-    while curr != (0,0):
+    while curr != startCell:
         val = childToParentMapping[curr]
         curr = list(val)[0]
         path.append(curr)
@@ -173,7 +176,7 @@ def breadth_first_search(my_grid, ghostCheck=0, start_x=0, start_y=0, goal_x=gri
         print('currcell : ' + str(currCell) + str(type(currCell)))
         # KV: Introduced below If condition to check for nearest ghost
         if my_grid[currCell[0],currCell[1]] < 0 and ghostCheck == 1:
-            return print_bfs_path(childToParentMap, (currCell[0], currCell[1]))
+            return print_bfs_path(childToParentMap, (currCell[0], currCell[1]), (start_x, start_y))
         if currCell not in explored:            # to solve the issue where code was revisiting already explored cells
             explored.append(currCell)
         #explored.append(nextCell)      # when was this appended? Unsure
@@ -188,7 +191,7 @@ def breadth_first_search(my_grid, ghostCheck=0, start_x=0, start_y=0, goal_x=gri
                 # path_xy = bfs_path[path_xy]
             #     print('PathFwd : '+str(pathFwd))
             # return pathFwd
-            return print_bfs_path(childToParentMap, (goal_x,goal_y))
+            return print_bfs_path(childToParentMap, (goal_x,goal_y), (start_x, start_y))
         # write code to check each side : LUDR and check if not going array out of bounds
         # Code to select nextCell as Left
         if currCell[1] != 0:
@@ -197,8 +200,9 @@ def breadth_first_search(my_grid, ghostCheck=0, start_x=0, start_y=0, goal_x=gri
                 if nextCell not in explored:
                     if (nextCell[0],nextCell[1]) in childToParentMap:
                         if childToParentMap[(nextCell[0],nextCell[1])] is not None:
-                            val = childToParentMap[(nextCell[0],nextCell[1])].add((currCell[0],currCell[1]))
-                            childToParentMap[(nextCell[0],nextCell[1])] = val
+                            childToParentMap[(nextCell[0],nextCell[1])].add((currCell[0],currCell[1]))
+                            # val = childToParentMap[(nextCell[0],nextCell[1])].add((currCell[0],currCell[1]))
+                            # childToParentMap[(nextCell[0],nextCell[1])] = val
                         else:
                             value = set()
                             value.add((currCell[0],currCell[1]))
@@ -216,8 +220,9 @@ def breadth_first_search(my_grid, ghostCheck=0, start_x=0, start_y=0, goal_x=gri
                 if nextCell not in explored:
                     if (nextCell[0],nextCell[1]) in childToParentMap:
                         if childToParentMap[(nextCell[0],nextCell[1])] is not None:
-                            val = childToParentMap[(nextCell[0],nextCell[1])].add((currCell[0],currCell[1]))
-                            childToParentMap[(nextCell[0],nextCell[1])] = val
+                            childToParentMap[(nextCell[0],nextCell[1])].add((currCell[0],currCell[1]))
+                            # val = childToParentMap[(nextCell[0],nextCell[1])].add((currCell[0],currCell[1]))
+                            # childToParentMap[(nextCell[0],nextCell[1])] = val
                         else:
                             value = set()
                             value.add((currCell[0],currCell[1]))
@@ -235,8 +240,9 @@ def breadth_first_search(my_grid, ghostCheck=0, start_x=0, start_y=0, goal_x=gri
                 if nextCell not in explored:
                     if (nextCell[0],nextCell[1]) in childToParentMap:
                         if childToParentMap[(nextCell[0],nextCell[1])] is not None:
-                            val = childToParentMap[(nextCell[0],nextCell[1])].add((currCell[0],currCell[1]))
-                            childToParentMap[(nextCell[0],nextCell[1])] = val
+                            childToParentMap[(nextCell[0],nextCell[1])].add((currCell[0],currCell[1]))
+                            # val = childToParentMap[(nextCell[0],nextCell[1])].add((currCell[0],currCell[1]))
+                            # childToParentMap[(nextCell[0],nextCell[1])] = val
                         else:
                             value = set()
                             value.add((currCell[0],currCell[1]))
@@ -254,8 +260,9 @@ def breadth_first_search(my_grid, ghostCheck=0, start_x=0, start_y=0, goal_x=gri
                 if nextCell not in explored:
                     if (nextCell[0],nextCell[1]) in childToParentMap:
                         if childToParentMap[(nextCell[0],nextCell[1])] is not None:
-                            val = childToParentMap[(nextCell[0],nextCell[1])].add((currCell[0],currCell[1]))
-                            childToParentMap[(nextCell[0],nextCell[1])] = val
+                            childToParentMap[(nextCell[0],nextCell[1])].add((currCell[0],currCell[1]))
+                            # val = childToParentMap[(nextCell[0],nextCell[1])].add((currCell[0],currCell[1]))
+                            # childToParentMap[(nextCell[0],nextCell[1])] = val
                         else:
                             value = set()
                             value.add((currCell[0],currCell[1]))
@@ -274,7 +281,7 @@ def breadth_first_search(my_grid, ghostCheck=0, start_x=0, start_y=0, goal_x=gri
             continue
         if nextCell is None:
             print('nextCell is not defined. Path probably does not exist')
-            return print_bfs_path(childToParentMap, (goal_x,goal_y))
+            return print_bfs_path(childToParentMap, (goal_x,goal_y), (start_x, start_y))
             # return pathFwd
         explored.append(nextCell)
         # bfs_path[tuple(nextCell)] = tuple(currCell)
@@ -288,10 +295,10 @@ def breadth_first_search(my_grid, ghostCheck=0, start_x=0, start_y=0, goal_x=gri
         if i>2000:
             print('Value of i is more than threshold')
             # return pathFwd
-            return print_bfs_path(childToParentMap, (goal_x,goal_y))
+            return print_bfs_path(childToParentMap, (goal_x,goal_y), (start_x, start_y))
     else:
         print('Path does not exist!')
-        return False
+        return {}
     # except Exception as error111:
     #     print('No path present')
     #     print(error111)
@@ -419,62 +426,54 @@ def create_env():
 #   2) Changed hardcoded 3 to 'gridsize-1'
 #   3) Possible if-else error. Changing to if-elif-else:
 # def ghostmovement(my_grid):
-def ghostmovement(my_grid):
-    #global my_grid
-    #ghostPositionList=[[1,1],[2,3],[3,0],[3,1]]
-    ghostPositionList=np.argwhere(my_grid < 0)
-    print("original" , ghostPositionList)
-    # ghostPositionListTemp =np.argwhere(my_grid==-10)
-    # print("temp", ghostPositionListTemp)
+#MANAN-START
+# Method for Random movements for ghosts, 
+# It accounts for Ghosts position at call [spawn if Timestamp=0] considers the probability of moving to LUDR
+# Or Stay at the same place.
 
-    # ghostPositionList = [for i in range()]
+def ghostmovement(my_grid):
+    ghostPositionList=np.argwhere(my_grid < 0)
+    print('ghostPositionList:12312123123::::',(ghostPositionList))
+
     for index in ghostPositionList:
         no_of_ghosts=(math.ceil(abs(my_grid[index[0],index[1]]/10)))
         while no_of_ghosts>1:
-            # ghostPositionList=np.append(ghostPositionList,index)
+            ghostPositionList=np.append(ghostPositionList,index)
             no_of_ghosts=no_of_ghosts-1
-
-    #ghostPositionList=[[1,1],[2,3]]
-    print('OG GRID',my_grid)
-    # print('ghostPositionList:::::',type(ghostPositionList))
-    # print('ghostPositionList:12312123123::::',(ghostPositionList))
-
-
-    # ghostPositionList = ghostPositionList.tolist()
-    # print('ghostPositionList:::::',type(ghostPositionList))
-    # print('ghostPositionList:12312123123::::',(ghostPositionList))
+    print('ghostPositionList:345345345345::::',(ghostPositionList))
+    ghostPositionList=ghostPositionList.reshape((ghostPositionList.size)//2,2)
 
     for list in ghostPositionList:              #for element in list:
             #L=(1) U=(2) D=(3) R=(4)
-            print(list)
+            print('GHOST POSITION',list) 
             if(list[0]==0 and list[1]==0): #START :CANT GO UP AND LEFT
                     direction=np.random.choice([3,4])
-                    print('5')
+                    #print('5')
             elif(list[0]==0 and list[1]==(grid_size - 1)): #RIGHT TOP :CANT GO UP AND RIGHT
                     direction=np.random.choice([1,3])
-                    print('6')
+                    #print('6')
             elif(list[0]==(grid_size - 1) and list[1]==0): #BOTTOM LEFT :CANT GO DOWN AND LEFT
                     direction=np.random.choice([2,4])
-                    print('7')
+                    #print('7')
             elif(list[1]==(grid_size - 1) and list[1]==(grid_size - 1)): #GOAL :CANT GO DOWN AND RIGHT
                     direction=np.random.choice([1,2])
-                    print('8')
+                    #print('8')
             elif(list[1]==0):
                     direction=np.random.choice([2,3,4])     # If ghost is on the left most cell, can only go Up, Down and Right
-                    print('1')
+                    #print('1')
             elif(list[0]==0):
                     direction=np.random.choice([1,3,4])     # If ghost is on the top most cell, can only go Left, Down and Right
-                    print('2')
+                    #print('2')
             elif(list[0]==(grid_size - 1)):
                     direction=np.random.choice([1,2,4])     # If ghost is on the bottom most cell, can only go Left, Up and Right
-                    print('3')
+                    #print('3')
             elif(list[1]==(grid_size - 1)):
                     direction=np.random.choice([1,2,3])     # If ghost is on the right most cell, can only go Left, Up and Down
-                    print('4')
+                    #print('4')
             else:
                 direction=np.random.randint(low=1, high=5)
-                print('9')
-            print('GHOST POSITION',list) 
+                #print('9')
+            
             print('Random Direction:L=(1) U=(2) D=(3) R=(4)::',direction)
             
             
@@ -503,7 +502,7 @@ def ghostmovement(my_grid):
                     my_grid[list[0]-1][list[1]]=my_grid[list[0]-1][list[1]]-10
                     list[0]=list[0]-1
                 elif (my_grid[list[0]-1][list[1]]==1 or my_grid[list[0]-1][list[1]]%10!=0) and (list[0]>0): #BLOCKED CELL
-                    print('UP',my_grid[list[0]-1][list[1]])
+                    #print('UP',my_grid[list[0]-1][list[1]])
                     directionIfBlocked=np.random.randint(low=0, high=2) #0=Stay, 1 =Go inside the Block
                     if directionIfBlocked==1:
                         print('MOVE TO BLOCKED')
@@ -550,7 +549,6 @@ def ghostmovement(my_grid):
 
     #MANAN-END
 
-
 def agentOneTraversal():
     a1 = start_pos          # Agent 1 coordinates denoted by this variable
     aStarPathDetermined = aStar(my_grid)
@@ -570,6 +568,7 @@ def agentOneTraversal():
     return True
 
 def getAwayFromGhost(currCell, nearestGhostPos):        # --> Returns tuple value of nextPosition to take
+    global getAwayFromGhostRunCheck
     if nearestGhostPos[0] == (currCell[0] + 1):     # Ghost is in down direction of Agent 2
         if currCell[0] == 0 and currCell[1] == (grid_size-1):   #Agent cant go to the right, only possible option: go left
             direction = 1
@@ -579,6 +578,10 @@ def getAwayFromGhost(currCell, nearestGhostPos):        # --> Returns tuple valu
             # nextCell = (currCell[0], currCell[1]+1)
         elif currCell[0] == 0:                      # Agent can go left or right
             direction = np.random.choice([1,4])
+        elif currCell[1] == 0:  # Agent can go up and right
+            direction = np.random.choice([2,4])
+        elif currCell[1] == (grid_size-1): # Agent can go left and up
+            direction = np.random.choice([1,2])
         else:                   # Agent can go Left, Up and Right
             direction = np.random.choice([1,2,4])
             # nextCell = (currCell[0], currCell[1]+direction)
@@ -589,9 +592,13 @@ def getAwayFromGhost(currCell, nearestGhostPos):        # --> Returns tuple valu
             direction = 4
         elif currCell[0] == (grid_size-1):                      # Agent can go left or right
             direction = np.random.choice([1,4])
+        elif currCell[1] == 0:  # Agent can go left and down
+            direction = np.random.choice([3,4])
+        elif currCell[1] == (grid_size-1): # Agent can go right and down
+            direction = np.random.choice([1,3])
         else:
             direction = np.random.choice([1,3,4])
-    elif nearestGhostPos[1] == (currCell[0] + 1):     # Ghost is in right direction of Agent 2
+    elif nearestGhostPos[1] == (currCell[1] + 1):     # Ghost is in right direction of Agent 2
         if currCell[0] == 0 and currCell[1] == 0:   #Agent cant go to the left, only possible option: go down
             direction = 3
             # nextCell = (currCell[0], currCell[1]-1)
@@ -600,10 +607,14 @@ def getAwayFromGhost(currCell, nearestGhostPos):        # --> Returns tuple valu
             # nextCell = (currCell[0], currCell[1]+1)
         elif currCell[1] == 0:                      # Agent can go up and down
             direction = np.random.choice([2,3])
+        elif currCell[0] == 0:  # Agent can go left and down
+            direction = np.random.choice([1,3])
+        elif currCell[0] == (grid_size-1): # Agent can go left and up
+            direction = np.random.choice([1,2])
         else:                   # Agent can go Left, Up and Down
             direction = np.random.choice([1,2,3])
             # nextCell = (currCell[0], currCell[1]+direction)
-    elif nearestGhostPos[0] == (currCell[0] - 1):     # Ghost is in left direction of Agent 2
+    elif nearestGhostPos[1] == (currCell[1] - 1):     # Ghost is in left direction of Agent 2
         if currCell[0] == 0 and currCell[1] == (grid_size-1):   #Agent cant go to the right and up, only possible option: go down
             direction = 3
             # nextCell = (currCell[0], currCell[1]-1)
@@ -612,6 +623,10 @@ def getAwayFromGhost(currCell, nearestGhostPos):        # --> Returns tuple valu
             # nextCell = (currCell[0], currCell[1]+1)
         elif currCell[1] == (grid_size-1):                      # Agent can go up and down
             direction = np.random.choice([2,3])
+        elif currCell[0] == 0:  # Agent can go right and down
+            direction = np.random.choice([3,4])
+        elif currCell[0] == (grid_size-1): # Agent can go right and up
+            direction = np.random.choice([2,4])
         else:                   # Agent can go Up, Down and Right
             direction = np.random.choice([4,2,3])
     if direction==1:            # Go Left
@@ -622,6 +637,15 @@ def getAwayFromGhost(currCell, nearestGhostPos):        # --> Returns tuple valu
         nextCell = (currCell[0]+1, currCell[1])
     else:            # Go Right
         nextCell = (currCell[0], currCell[1]+1)
+
+    if my_grid[nextCell[0]][nextCell[1]] != 0:
+        getAwayFromGhostRunCheck+=1
+        if getAwayFromGhostRunCheck > 10:
+            return []
+        getAwayFromGhost(currCell, nearestGhostPos)
+    else:
+        getAwayFromGhostRunCheck=0
+
     return nextCell
 
     #L=(1) U=(2) D=(3) R=(4)
@@ -642,7 +666,7 @@ def agentTwoTraversal():
             print('nearestGhostPosition : ')
             print(nearestGhostPosition)
             nextLocA2 = getAwayFromGhost(a2, nearestGhostPosition)      # Passes current Agent 2 location and the next Path that Agent will have to take to get to the nearest ghost
-            if my_grid[nextLocA2[0],nextLocA2[1]] < 0:
+            if not nextLocA2 or my_grid[nextLocA2[0],nextLocA2[1]] < 0:
                 print('Agent is in Blocked Cell. Some Serious Error !!!!!!!!!!!!!!')
                 return False
         else:
@@ -692,14 +716,67 @@ if __name__=='__main__':
     #         break
     #     nr_of_ghosts+=1
 
-    # Agent 2 Traversal
-    nr_of_ghosts = 5
-    agentTwoReached = agentTwoTraversal()
-    print('Agent Two Reached : ' + str(agentTwoReached))
-    print(my_grid)
+    # # Agent 2 Traversal
+    # while True:                 # Loop to check till what number can the Agent survive
+    #     nr_of_ghosts = 5
+    #     agentTwoReached = agentTwoTraversal()
+    #     print('Agent Two Reached : ' + str(agentTwoReached))
+    #     print(my_grid)
 
+    # a2Survivability = {}
+    # while True:                 # Loop to check till what number can the Agent survive
+    #     for i in range(1,25):
+    #         create_env()            # New Env everytime
+    #         agentTwoReached = agentTwoTraversal()
+    #         print('Agent Two Reached : ' + str(agentTwoReached))
+    #         if nr_of_ghosts in a2Survivability:         # Dictionary containing results of Agent 1's Traversal success
+    #             a2Survivability[nr_of_ghosts].append(agentTwoReached)
+    #         else:
+    #             a2Survivability[nr_of_ghosts] = [agentTwoReached]
+    #         print(my_grid)
+    #     print(a2Survivability)
+    #     if True not in a2Survivability[nr_of_ghosts]:       # Loop must break if Agent 1's survivability is no more.
+    #         break
+    #     if nr_of_ghosts>30:         # A check to limit how many times loop will go on, safety mechanism
+    #         break
+    #     nr_of_ghosts+=1
+    
+    #Metric:
+    #AgentNo, RunNo, No. of ghosts, Win/Loss, Time, Future-(No. of steps)
+    a2Survivability = {}
+    a2Data = []
+    a2RunNo = 1
+    while True:                 # Loop to check till what number can the Agent survive
+        for i in range(1,30):
+            create_env()            # New Env everytime
+            startTime = time.time()
+            agentTwoReached = agentTwoTraversal()
+            print('Agent Two Reached : ' + str(agentTwoReached))
+            if agentTwoReached:
+                val = True
+            else:
+                val = False
+            if nr_of_ghosts in a2Survivability:         # Dictionary containing results of Agent 2's Traversal success
+                a2Survivability[nr_of_ghosts].append(val)
+            else:
+                a2Survivability[nr_of_ghosts] = [val]
+            executionTime = time.time() - startTime
+            a2Data.append(["A2", a2RunNo, nr_of_ghosts, val, executionTime])
+            a2RunNo+=1
+            print(my_grid)
+        print(a2Survivability)
+        if True not in a2Survivability[nr_of_ghosts]:       # Loop must break if Agent 2's survivability is no more.
+            break
+        if nr_of_ghosts>10:         # A check to limit how many times loop will go on, safety mechanism
+            break
+        nr_of_ghosts+=1
 
-
+    
+    with open('a2Data1.csv', 'w', newline='') as file:
+        writer = csv.writer(file, delimiter=',')
+        writer.writerows(a2Data)
+    
+    file.close()
 
     # print('----------------- BFS Output -----------------')
     # print(breadth_first_search(my_grid))
