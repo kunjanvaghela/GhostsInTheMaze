@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import math
 from queue import Empty, PriorityQueue
 import numpy as np
@@ -8,7 +10,7 @@ import csv
 my_grid=[]              # To store grid, changes when ghost traverses will happen in this directly.
 my_grid_original=[]     # To store original grid, with original position of ghosts
 invalid_indices=[]      # To store indices which are blocked, and where ghost cannot pop up
-grid_size=5            # Size of the grid
+grid_size=51            # Size of the grid
 nr_of_ghosts=1          # Number of the ghosts to conjure
 start_pos = (0,0)
 final_pos = (grid_size-1, grid_size-1)
@@ -711,7 +713,7 @@ def agentTwoTraversal():
         # break
     return True
 
-def writeAg2MetricForAg3(mazeNo, nr_of_ghost, agent2Dict):
+def writeAg2MetricForAg3(mazeNo, nr_of_ghost, agent2Dict, outputFileName):
     #Metric: No. of ghosts, MazeNo, position[0], position[1], direction, wins, total
     global agent2For3
     masterKey = ()
@@ -739,7 +741,7 @@ def writeAg2MetricForAg3(mazeNo, nr_of_ghost, agent2Dict):
         toWriteData.append(a1)  #No of ghosts, position[0], position[1], survivability, countOfTurns
 
     print(toWriteData)
-    with open('a2DataTemp.csv', 'w', newline='') as file:
+    with open(outputFileName, 'w', newline='') as file:
         writer = csv.writer(file, delimiter=',')
         writer.writerows(toWriteData)
 
@@ -799,8 +801,14 @@ def agent3Traversal(nr_of_ghosts):
     # return True
 
 
+import sys
 
 if __name__=='__main__':
+
+    lenOfArgs = len(sys.argv)
+    input_no_of_ghosts = int(sys.argv[1])
+    outputFileName = "a2DataFor3_" + str(input_no_of_ghosts) + ".csv"
+
     create_env()
     print('Original Grid generated : ')
     print(my_grid)
@@ -831,49 +839,53 @@ if __name__=='__main__':
     #         break
     #     nr_of_ghosts+=1
 
+
     #Metric:
     #AgentNo, RunNo, No. of ghosts, MazeNo, Win/Loss, Time, Future-(No. of steps)
     a2Survivability = {}
     a2Data = []
     a2RunNo = 1
+    nr_of_ghosts = input_no_of_ghosts
     while True:                 # Loop to check till what number can the Agent survive
-        for i in range(1,30):
-            create_env()            # New Env everytime
-            for t in range(1,25):   # For each nr_of_ghost, each grid configuration, running agent 25 times.
-                startTime = time.time()
-                agentTwoReached = agentTwoTraversal()
-                print('Agent Two Reached : ' + str(agentTwoReached))
-                if agentTwoReached:
-                    val = True
-                    for keys in agent2PathAndMetric:
-                        agent2PathAndMetric[keys] = True
-                else:
-                    val = False
-                if nr_of_ghosts in a2Survivability:         # Dictionary containing results of Agent 2's Traversal success
-                    a2Survivability[nr_of_ghosts].append(val)
-                else:
-                    a2Survivability[nr_of_ghosts] = [val]
-                executionTime = time.time() - startTime
-                a2Data.append(["A2", a2RunNo, nr_of_ghosts, i, val, executionTime])
-                a2RunNo+=1
-                print(my_grid)
-                print('agent2PathAndMetric : '+ str(agent2PathAndMetric))
-                writeAg2MetricForAg3(i, nr_of_ghosts, agent2PathAndMetric)
-                agent2PathAndMetric = {}
+        create_env()            # New Env everytime
+        for t in range(1,25):   # For each nr_of_ghost, each grid configuration, running agent 25 times.
+            startTime = time.time()
+            agentTwoReached = agentTwoTraversal()
+            print('Agent Two Reached : ' + str(agentTwoReached))
+            if agentTwoReached:
+                val = True
+                for keys in agent2PathAndMetric:
+                    agent2PathAndMetric[keys] = True
+            else:
+                val = False
+            if nr_of_ghosts in a2Survivability:         # Dictionary containing results of Agent 2's Traversal success
+                a2Survivability[nr_of_ghosts].append(val)
+            else:
+                a2Survivability[nr_of_ghosts] = [val]
+            executionTime = time.time() - startTime
+            a2Data.append(["A2", a2RunNo, nr_of_ghosts, val, executionTime])
+            a2RunNo+=1
+            print(my_grid)
+            print('agent2PathAndMetric : '+ str(agent2PathAndMetric))
+            writeAg2MetricForAg3(0, nr_of_ghosts, agent2PathAndMetric, outputFileName)
+            agent2PathAndMetric = {}
         print(a2Survivability)
 
-        if True not in a2Survivability[nr_of_ghosts]:       # Loop must break if Agent 2's survivability is no more.
-            break
-        if nr_of_ghosts>100:         # A check to limit how many times loop will go on, safety mechanism
-            break
-        nr_of_ghosts+=1
+        output_file_agent2 = "a2Data_" + str(nr_of_ghosts) + ".csv"
+        with open(output_file_agent2, 'w', newline='') as file:
+            writer = csv.writer(file, delimiter=',')
+            writer.writerows(a2Data)
+        
+        file.close()
 
-    
-    with open('a2Data1.csv', 'w', newline='') as file:
-        writer = csv.writer(file, delimiter=',')
-        writer.writerows(a2Data)
-    
-    file.close()
+        break
+
+        # if True not in a2Survivability[nr_of_ghosts]:       # Loop must break if Agent 2's survivability is no more.
+        #     break
+        # if nr_of_ghosts>100:         # A check to limit how many times loop will go on, safety mechanism
+        #     break
+        # nr_of_ghosts+=1
+
 
     # print('----------------- BFS Output -----------------')
     # print(breadth_first_search(my_grid))
