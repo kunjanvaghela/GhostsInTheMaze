@@ -440,19 +440,19 @@ def create_env():
 
 def ghostmovement(my_grid):
     ghostPositionList=np.argwhere(my_grid < 0)
-    print('ghostPositionList:12312123123::::',(ghostPositionList))
+    # print('ghostPositionList:12312123123::::',(ghostPositionList))
 
     for index in ghostPositionList:
         no_of_ghosts=(math.ceil(abs(my_grid[index[0],index[1]]/10)))
         while no_of_ghosts>1:
             ghostPositionList=np.append(ghostPositionList,index)
             no_of_ghosts=no_of_ghosts-1
-    print('ghostPositionList:345345345345::::',(ghostPositionList))
+    # print('ghostPositionList:345345345345::::',(ghostPositionList))
     ghostPositionList=ghostPositionList.reshape((ghostPositionList.size)//2,2)
 
     for list in ghostPositionList:              #for element in list:
             #L=(1) U=(2) D=(3) R=(4)
-            print('GHOST POSITION',list) 
+            # print('GHOST POSITION',list) 
             if(list[0]==0 and list[1]==0): #START :CANT GO UP AND LEFT
                     direction=np.random.choice([3,4])
                     #print('5')
@@ -594,7 +594,7 @@ def getAwayFromGhost(currCell, nearestGhostPos):        # --> Returns tuple valu
     validDirections.remove(ghostInDirection)
     print('validDirections after removing invalid indices '+str(validDirections))
     placeholderForRemovingValidDirections = validDirections[:]
-    for i in placeholderForRemovingValidDirections:
+    for i in placeholderForRemovingValidDirections:             # To remove blocked cells from the list of directions that can be taken
         nextCell = getNextCoordinatesToMoveTo(currCell, i)
         print('Checking direction '+str(i)+', checking nextCell '+str(nextCell)+ ' using checkForOpenPosition function')
         if (not checkForOpenPosition(nextCell)):        # checkForOpenPosition(nextCell) will return False if the cell is blocked.
@@ -711,8 +711,8 @@ def agentTwoTraversal():
             print('nearestGhostPosition : ')
             print(nearestGhostPosition)
             nextLocA2 = getAwayFromGhost(a2, nearestGhostPosition)      # Passes current Agent 2 location and the next Path that Agent will have to take to get to the nearest ghost
-            if nextLocA2 == a2:                                 # Included to go towards ghost if there are no other paths present. Implemented this as Agent 2 cannot stay at same location
-                nextLocA2=nearestGhostPosition
+            # if nextLocA2 == a2:                                 # Included to go towards ghost if there are no other paths present. Implemented this as Agent 2 cannot stay at same location
+            #     nextLocA2=nearestGhostPosition
             if not nextLocA2 or my_grid[nextLocA2[0],nextLocA2[1]] < 0:
                 print('Agent is in Blocked Cell. Some Serious Error !!!!!!!!!!!!!!')
                 return False
@@ -737,7 +737,7 @@ def agentTwoTraversal():
         # break
     return True
 
-def writeAg2MetricForAg3(mazeNo, nr_of_ghost, agent2Dict):
+def writeAg2MetricForAg3(mazeNo, nr_of_ghost, agent2Dict, outputFileName):
     #Metric: No. of ghosts, MazeNo, position[0], position[1], direction, wins, total
     global agent2For3
     masterKey = ()
@@ -765,7 +765,7 @@ def writeAg2MetricForAg3(mazeNo, nr_of_ghost, agent2Dict):
         toWriteData.append(a1)  #No of ghosts, position[0], position[1], survivability, countOfTurns
 
     print(toWriteData)
-    with open('a2DataTemp.csv', 'w', newline='') as file:
+    with open(outputFileName, 'w', newline='') as file:
         writer = csv.writer(file, delimiter=',')
         writer.writerows(toWriteData)
 
@@ -801,11 +801,11 @@ def checkAdjacentCoordinatesForGhost(currCell):                 # Checks if adja
     ghostPositionsNearby = []           # This list will contain positions of the nearby ghost, in adjacent cell
     if (not checkForOpenPosition((currCell[0]+1, currCell[1]), 1)):
         ghostPositionsNearby.append((currCell[0]+1, currCell[1]))
-    elif (not checkForOpenPosition((currCell[0]-1, currCell[1]), 1)):
+    if (not checkForOpenPosition((currCell[0]-1, currCell[1]), 1)):
         ghostPositionsNearby.append((currCell[0]-1, currCell[1]))
-    elif (not checkForOpenPosition((currCell[0], currCell[1]-1), 1)):
+    if (not checkForOpenPosition((currCell[0], currCell[1]-1), 1)):
         ghostPositionsNearby.append((currCell[0], currCell[1]-1))
-    elif (not checkForOpenPosition((currCell[0], currCell[1]+1), 1)):
+    if (not checkForOpenPosition((currCell[0], currCell[1]+1), 1)):
         ghostPositionsNearby.append((currCell[0], currCell[1]+1))
     return ghostPositionsNearby
 
@@ -895,7 +895,7 @@ if __name__=='__main__':
     print('Original Grid generated : ')
     print(my_grid)
     my_grid_original = my_grid                  # To have a backup of original grid
-    print('Copied above grid to my_grid_original :')
+    # print('Copied above grid to my_grid_original :')
 
     # Agent 1 Traversing
     # agentOneReached = agentOneTraversal()
