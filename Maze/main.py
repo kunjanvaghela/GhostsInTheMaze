@@ -693,7 +693,7 @@ def getAwayFromGhost(currCell, nearestGhostPos):        # --> Returns tuple valu
     #L=(1) U=(2) D=(3) R=(4)
 
 
-def agentTwoTraversal():
+def agentTwoTraversal(start_pos = (0,0)):
     global agent2PathAndMetric
     a2 = start_pos          # Agent 1 coordinates denoted by this variable
     nearestGhostPosition = tuple()
@@ -835,6 +835,37 @@ def getInvalidAdjacentDirectionsToGoTo(currcell):
         directions.append(4)
     return directions
     
+def moveAsPerAgent2(nr_of_ghosts, currCell, allowedDirections):
+    with open("a2DataFor3_" + str(nr_of_ghosts) + ".csv", newline='') as file:
+        a2Reader = csv.reader(file, delimiter=' ', quotechar='|')
+        directionValue = [0,0,0,0]
+        for row in a2Reader:
+            row = row[0].split(',')
+            row = [int(i) for i in row]
+            print(row)
+            if row[1] == currCell[0] and row[2] == currCell[1]:
+                if row[3] == 1:
+                    directionValue[0] = row[4] / row[5]
+                elif row[3] == 2:
+                    directionValue[1] = row[4] / row[5]
+                elif row[3] == 3:
+                    directionValue[2] = row[4] / row[5]
+                else:
+                    directionValue[3] = row[4] / row[5]
+        origDirections = [1,2,3,4]
+        for x in allowedDirections:
+            origDirections.remove(x)
+        for i in origDirections:
+            directionValue[i-1] = -100
+        count=0
+        for i in directionValue:
+            if i == 0:
+                count+=1
+        if count == 4:
+            return -100            
+        directionToTake = directionValue.index(max(directionValue)) + 1
+        print(directionToTake)
+        return directionToTake
 
 def agent3Traversal(nr_of_ghosts):
     a3 = start_pos          # Agent 3 coordinates denoted by this variable.
@@ -843,11 +874,64 @@ def agent3Traversal(nr_of_ghosts):
     #Take one with the maximum survivability.
     #If again coming on this path, take the random move.
     #If no data for a given cell, run Agent 2's strategy only once.
-    a3CellExplored = [start_pos]
-    # with open('eggs.csv', newline='') as csvfile:
-    #     spamreader = csv.reader(csvfile, delimiter=' ', quotechar='|')
-    #     for row in spamreader:
-    #         print(', '.join(row))
+    a3CellExplored = []
+    while (a3 != final_pos):
+        if a3 in a3CellExplored:
+            aStarPathDetermined = aStar(my_grid, 0, a3[0], a3[1])
+            nextCell = aStarPathDetermined[(a3[0],a3[1])]
+            if my_grid[nextCell[0]][nextCell[1]] != 0:
+                a3 = a3
+            else:
+                a3 = nextCell
+        else:
+            a3AllowedDirections = [1,2,3,4]     # Initiated a direction list, invalid or blocked directions will be removed from this list.
+            invalidDirections = getInvalidAdjacentDirectionsToGoTo(a3)      # Gets list of invalid adjacent directions, which will lead to agent going out of environment
+            print('invalidDirections : '+str(invalidDirections))
+            for i in invalidDirections:
+                print('Removing value '+str(i)+' from a3AllowedDirections '+str(a3AllowedDirections))
+                a3AllowedDirections.remove(i)       # Removes invalid directions from allowed directions for the agent from current position
+            nearbyGhostPositions = checkAdjacentCoordinatesForGhost(a3)
+            if len(nearbyGhostPositions) != 0:
+                for pos in nearbyGhostPositions:
+                    a3AllowedDirections.remove(findDirection(a3, pos))
+            placeholderAllowedDirections = a3AllowedDirections[:]
+            for dir in placeholderAllowedDirections:
+                nextCell = getNextCoordinatesToMoveTo(a3, dir)
+                if (not checkForOpenPosition(nextCell)):
+                    a3AllowedDirections.remove(dir)
+
+            print("Allowed Directions "+ str(a3AllowedDirections))
+            directionToTake = moveAsPerAgent2(nr_of_ghosts, start_pos, a3AllowedDirections)
+            if directionToTake == -100:
+                aStarPathDetermined = aStar(my_grid, 0, a3[0], a3[1])
+                nextCell = aStarPathDetermined[(a3[0],a3[1])]
+                if my_grid[nextCell[0]][nextCell[1]] != 0:
+                    a3 = a3
+                else:
+                    a3 = nextCell
+            else:
+                nextCell = getNextCoordinatesToMoveTo(a3, directionToTake)
+                a3=nextCell
+
+                # while my_grid[nextCell[0]][nextCell[1]] == 1 or my_grid[nextCell[0]][nextCell[1]] < 0:
+                #     a3AllowedDirections.remove(directionToTake)
+                #     if len(a3AllowedDirections) == 0:
+                #         return False
+                    # directionToTake = moveAsPerAgent2(nr_of_ghosts, start_pos, a3AllowedDirections)
+                    # nextCell = getNextCoordinatesToMoveTo(a3, directionToTake)
+                # Movement of ghost initiated
+        ghostmovement(my_grid)
+        print(a3)
+        if a3 not in a3CellExplored:
+            a3CellExplored.append(a3)
+        if my_grid[a3[0]][a3[1]] == 1:
+            print('Agent is in Blocked Cell. Some Serious Error !!!!!!!!!!!!!!')
+        if my_grid[a3[0]][a3[1]] != 0:
+            print('Agent not in Open Cell. Ghost Encountered ????????????')
+            print(my_grid[a3[0]][a3[1]])
+            return False
+
+    return True
 
     # nearestGhostPosition = tuple()
     # while (a3 != final_pos):
@@ -921,49 +1005,87 @@ if __name__=='__main__':
     #         break
     #     nr_of_ghosts+=1
 
+    # #Metric:
+    # #AgentNo, RunNo, No. of ghosts, MazeNo, Win/Loss, Time, Future-(No. of steps)
+    # a2Survivability = {}
+    # a2Data = []
+    # a2RunNo = 1
+    # while True:                 # Loop to check till what number can the Agent survive
+    #     for i in range(1,30):
+    #         create_env()            # New Env everytime
+    #         for t in range(1,25):   # For each nr_of_ghost, each grid configuration, running agent 25 times.
+    #             startTime = time.time()
+    #             agentTwoReached = agentTwoTraversal()
+    #             print('Agent Two Reached : ' + str(agentTwoReached))
+    #             if agentTwoReached:
+    #                 val = True
+    #                 for keys in agent2PathAndMetric:
+    #                     agent2PathAndMetric[keys] = True
+    #             else:
+    #                 val = False
+    #             if nr_of_ghosts in a2Survivability:         # Dictionary containing results of Agent 2's Traversal success
+    #                 a2Survivability[nr_of_ghosts].append(val)
+    #             else:
+    #                 a2Survivability[nr_of_ghosts] = [val]
+    #             executionTime = time.time() - startTime
+    #             a2Data.append(["A2", a2RunNo, nr_of_ghosts, i, val, executionTime])
+    #             a2RunNo+=1
+    #             print(my_grid)
+    #             print('agent2PathAndMetric : '+ str(agent2PathAndMetric))
+    #             writeAg2MetricForAg3(i, nr_of_ghosts, agent2PathAndMetric)
+    #             agent2PathAndMetric = {}
+    #     print(a2Survivability)
+
+    #     if True not in a2Survivability[nr_of_ghosts]:       # Loop must break if Agent 2's survivability is no more.
+    #         break
+    #     if nr_of_ghosts>100:         # A check to limit how many times loop will go on, safety mechanism
+    #         break
+    #     nr_of_ghosts+=1
+
+    
+    # with open('a2Data1.csv', 'w', newline='') as file:
+    #     writer = csv.writer(file, delimiter=',')
+    #     writer.writerows(a2Data)
+    
+    # file.close()
+
     #Metric:
-    #AgentNo, RunNo, No. of ghosts, MazeNo, Win/Loss, Time, Future-(No. of steps)
-    a2Survivability = {}
-    a2Data = []
-    a2RunNo = 1
+    #AgentNo, No. of ghosts, Win/Loss, Time, Future-(No. of steps)
+    a3Survivability = {}
+    a3Data = []
     while True:                 # Loop to check till what number can the Agent survive
         for i in range(1,30):
             create_env()            # New Env everytime
-            for t in range(1,25):   # For each nr_of_ghost, each grid configuration, running agent 25 times.
-                startTime = time.time()
-                agentTwoReached = agentTwoTraversal()
-                print('Agent Two Reached : ' + str(agentTwoReached))
-                if agentTwoReached:
-                    val = True
-                    for keys in agent2PathAndMetric:
-                        agent2PathAndMetric[keys] = True
-                else:
-                    val = False
-                if nr_of_ghosts in a2Survivability:         # Dictionary containing results of Agent 2's Traversal success
-                    a2Survivability[nr_of_ghosts].append(val)
-                else:
-                    a2Survivability[nr_of_ghosts] = [val]
-                executionTime = time.time() - startTime
-                a2Data.append(["A2", a2RunNo, nr_of_ghosts, i, val, executionTime])
-                a2RunNo+=1
-                print(my_grid)
-                print('agent2PathAndMetric : '+ str(agent2PathAndMetric))
-                writeAg2MetricForAg3(i, nr_of_ghosts, agent2PathAndMetric)
-                agent2PathAndMetric = {}
-        print(a2Survivability)
+            startTime = time.time()
+            agentThreeReached = agent3Traversal(nr_of_ghosts)
+            print('Agent Two Reached : ' + str(agentThreeReached))
+            if agentThreeReached:
+                val = True
+            else:
+                val = False
+            if nr_of_ghosts in a3Survivability:         # Dictionary containing results of Agent 2's Traversal success
+                a3Survivability[nr_of_ghosts].append(val)
+            else:
+                a3Survivability[nr_of_ghosts] = [val]
+            executionTime = time.time() - startTime
+            a3Data.append(["A3", nr_of_ghosts, val, executionTime])
+            print(my_grid)
+        print(a3Survivability)
 
-        if True not in a2Survivability[nr_of_ghosts]:       # Loop must break if Agent 2's survivability is no more.
+        if True not in a3Survivability[nr_of_ghosts]:       # Loop must break if Agent 2's survivability is no more.
             break
-        if nr_of_ghosts>100:         # A check to limit how many times loop will go on, safety mechanism
+        if nr_of_ghosts>2:         # A check to limit how many times loop will go on, safety mechanism
             break
         nr_of_ghosts+=1
 
-    
-    with open('a2Data1.csv', 'w', newline='') as file:
+    with open('a3Data1.csv', 'w', newline='') as file:
         writer = csv.writer(file, delimiter=',')
-        writer.writerows(a2Data)
+        writer.writerows(a3Data)
     
     file.close()
+
+    # agent3Reached = agent3Traversal(1)
+    # print(agent3Reached)
 
     # print('----------------- BFS Output -----------------')
     # print(breadth_first_search(my_grid))
