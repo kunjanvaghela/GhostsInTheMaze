@@ -1002,7 +1002,7 @@ if __name__=='__main__':
     nr_of_ghosts=1
     a4Data =[]
     while True:                 # Loop to check till what number can the Agent survive
-        for i in range(1,5):
+        for i in range(1,31):
             create_env()            # New Env everytime
             startTime = time.time()
             agentFourReached = agentFourTraversal()       # Agent 1 Traversal path with A* Algorithm
@@ -1016,9 +1016,9 @@ if __name__=='__main__':
             a4DataLength = len(a4Survivability[nr_of_ghosts])
             executionTime = time.time() - startTime
             a4Data.append(["A4", i, nr_of_ghosts, agentFourReached, executionTime])
-        if True not in a4Survivability[nr_of_ghosts]:       # Loop must break if Agent 1's survivability is no more.
-            break
-        if nr_of_ghosts>5:         # A check to limit how many times loop will go on, safety mechanism
+        # if True not in a4Survivability[nr_of_ghosts]:       # Loop must break if Agent 1's survivability is no more.
+        #     break
+        if nr_of_ghosts>100:         # A check to limit how many times loop will go on, safety mechanism
             break
         nr_of_ghosts+=1
 
