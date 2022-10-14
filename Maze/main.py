@@ -8,7 +8,7 @@ import csv
 my_grid=[]              # To store grid, changes when ghost traverses will happen in this directly.
 my_grid_original=[]     # To store original grid, with original position of ghosts
 invalid_indices=[]      # To store indices which are blocked, and where ghost cannot pop up
-grid_size=5            # Size of the grid
+grid_size=51            # Size of the grid
 nr_of_ghosts=1          # Number of the ghosts to conjure
 start_pos = (0,0)
 final_pos = (grid_size-1, grid_size-1)
@@ -586,6 +586,30 @@ def agentOneTraversal():
     return True
 
 def getAwayFromGhost(currCell, nearestGhostPos):        # --> Returns tuple value of nextPosition to take
+    validDirections = [1,2,3,4]
+    invalidDirections = getInvalidAdjacentDirectionsToGoTo(currCell)            # Get the cells which are invalid as they lie outside of environment
+    for i in invalidDirections:
+        validDirections.remove(i)       # Removing the invalid directions from the possible movement positions
+    ghostInDirection = findDirection(currCell, nearestGhostPos)
+    validDirections.remove(ghostInDirection)
+    print('validDirections after removing invalid indices '+str(validDirections))
+    placeholderForRemovingValidDirections = validDirections[:]
+    for i in placeholderForRemovingValidDirections:
+        nextCell = getNextCoordinatesToMoveTo(currCell, i)
+        print('Checking direction '+str(i)+', checking nextCell '+str(nextCell)+ ' using checkForOpenPosition function')
+        if (not checkForOpenPosition(nextCell)):        # checkForOpenPosition(nextCell) will return False if the cell is blocked.
+            print('Removing direction '+str(i))
+            validDirections.remove(i)
+            print('After removing, validDirection list : '+str(validDirections))
+    if validDirections == []:
+        print('No valid direction available to run away from the ghost. Hence agent will stay at same cell.')
+        return currCell
+    else:
+        direction = np.random.choice(validDirections)
+        nextCell = getNextCoordinatesToMoveTo(currCell, direction)
+        print('From valid Directions '+ str(direction) +' in getAwayFromGhost(), selected '+str(nextCell))
+        return nextCell
+
     global getAwayFromGhostRunCheck
     if nearestGhostPos[0] == (currCell[0] + 1):     # Ghost is in down direction of Agent 2
         if currCell[0] == 0 and currCell[1] == (grid_size-1):   #Agent cant go to the right, only possible option: go left
@@ -687,6 +711,8 @@ def agentTwoTraversal():
             print('nearestGhostPosition : ')
             print(nearestGhostPosition)
             nextLocA2 = getAwayFromGhost(a2, nearestGhostPosition)      # Passes current Agent 2 location and the next Path that Agent will have to take to get to the nearest ghost
+            if nextLocA2 == a2:                                 # Included to go towards ghost if there are no other paths present. Implemented this as Agent 2 cannot stay at same location
+                nextLocA2=nearestGhostPosition
             if not nextLocA2 or my_grid[nextLocA2[0],nextLocA2[1]] < 0:
                 print('Agent is in Blocked Cell. Some Serious Error !!!!!!!!!!!!!!')
                 return False
@@ -745,6 +771,70 @@ def writeAg2MetricForAg3(mazeNo, nr_of_ghost, agent2Dict):
 
 
     file.close()
+
+def checkForOpenPosition(cellToCheck, onlyGhostChecks = 0):             # Returns True if the passed cell is unblocked (that is does not contain ghosts or ghost in blocked cell)
+    if (cellToCheck[0] >=0 and cellToCheck[0] < grid_size) and (cellToCheck[1] >=0 and cellToCheck[1] <grid_size):
+        if (my_grid[cellToCheck[0],cellToCheck[1]] != 0) and onlyGhostChecks == 0:
+            return False
+        elif (my_grid[cellToCheck[0],cellToCheck[1]] < 0) and onlyGhostChecks == 1:
+            return False
+    return True         # To return True if passed cell is invalid, like if it lies outside the boundary of matrix. This cell will not have ghost.
+
+def checkOpenCellsForAgentFour(currPosition, determinedPath, visibility):       # Checks if there are any ghosts in determinedPath till next visibility path (+1 more depth)
+    for i in range(visibility):
+        if currPosition in determinedPath:
+            nextPosition = determinedPath[currPosition]
+            if (not checkForOpenPosition(nextPosition, 1)):
+                return True
+            elif (not checkForOpenPosition((nextPosition[0]+1, nextPosition[1]), 1)):
+                return True
+            elif (not checkForOpenPosition((nextPosition[0]-1, nextPosition[1]), 1)):
+                return True
+            elif (not checkForOpenPosition((nextPosition[0], nextPosition[1]-1), 1)):
+                return True
+            elif (not checkForOpenPosition((nextPosition[0], nextPosition[1]+1), 1)):
+                return True
+            currPosition = nextPosition
+    return False
+
+def checkAdjacentCoordinatesForGhost(currCell):                 # Checks if adjacent cells to the current cell contains ghost (and also blocked cells), if yes, returns the blocked positions
+    ghostPositionsNearby = []           # This list will contain positions of the nearby ghost, in adjacent cell
+    if (not checkForOpenPosition((currCell[0]+1, currCell[1]), 1)):
+        ghostPositionsNearby.append((currCell[0]+1, currCell[1]))
+    elif (not checkForOpenPosition((currCell[0]-1, currCell[1]), 1)):
+        ghostPositionsNearby.append((currCell[0]-1, currCell[1]))
+    elif (not checkForOpenPosition((currCell[0], currCell[1]-1), 1)):
+        ghostPositionsNearby.append((currCell[0], currCell[1]-1))
+    elif (not checkForOpenPosition((currCell[0], currCell[1]+1), 1)):
+        ghostPositionsNearby.append((currCell[0], currCell[1]+1))
+    return ghostPositionsNearby
+
+def getNextCoordinatesToMoveTo(currCell, direction):
+    nextCell = currCell
+    if direction==1:            # Go Left
+        nextCell = (currCell[0], currCell[1]-1)
+    elif direction==2:            # Go Up
+        nextCell = (currCell[0]-1, currCell[1])
+    elif direction==3:            # Go Down
+        nextCell = (currCell[0]+1, currCell[1])
+    elif direction == 4:            # Go Right
+        nextCell = (currCell[0], currCell[1]+1)
+    else:
+        print('Weird condition encountered in getNextCoordinatesToMoveTo')
+    return nextCell
+
+def getInvalidAdjacentDirectionsToGoTo(currcell):
+    directions=[]        # LUDR
+    if currcell[0] == 0:           # Top line, so cant go Up
+        directions.append(2)
+    if currcell[0] == (grid_size-1):    # Bottom line, so cant go Down
+        directions.append(3)
+    if currcell[1] == 0:        # Left most line, so cant go left
+        directions.append(1)
+    if currcell[1] == (grid_size-1):    # Right most line, so cant go right
+        directions.append(4)
+    return directions
+    
 
 def agent3Traversal(nr_of_ghosts):
     a3 = start_pos          # Agent 3 coordinates denoted by this variable.

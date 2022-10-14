@@ -21,7 +21,7 @@ import sys
 # run_parallel(os.system("python3 hello.py " + str(1)), os.system("python3 hello.py " + str(1+100)))
 
 procs = []
-for i in range(1,4):
+for i in range(1,100):
     proc = subprocess.Popen([sys.executable, 'mainAgent2.py', str(i)])
     procs.append(proc)
 
