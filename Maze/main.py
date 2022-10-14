@@ -8,7 +8,7 @@ import csv
 my_grid=[]              # To store grid, changes when ghost traverses will happen in this directly.
 my_grid_original=[]     # To store original grid, with original position of ghosts
 invalid_indices=[]      # To store indices which are blocked, and where ghost cannot pop up
-grid_size=5            # Size of the grid
+grid_size=51            # Size of the grid
 nr_of_ghosts=2          # Number of the ghosts to conjure
 start_pos = (0,0)
 final_pos = (grid_size-1, grid_size-1)
@@ -596,7 +596,7 @@ def getAwayFromGhost(currCell, nearestGhostPos):        # --> Returns tuple valu
     validDirections.remove(ghostInDirection)
     print('validDirections after removing invalid indices '+str(validDirections))
     placeholderForRemovingValidDirections = validDirections[:]
-    for i in placeholderForRemovingValidDirections:
+    for i in placeholderForRemovingValidDirections:             # To remove blocked cells from the list of directions that can be taken
         nextCell = getNextCoordinatesToMoveTo(currCell, i)
         print('Checking direction '+str(i)+', checking nextCell '+str(nextCell)+ ' using checkForOpenPosition function')
         if (not checkForOpenPosition(nextCell)):        # checkForOpenPosition(nextCell) will return False if the cell is blocked.
@@ -803,11 +803,11 @@ def checkAdjacentCoordinatesForGhost(currCell):                 # Checks if adja
     ghostPositionsNearby = []           # This list will contain positions of the nearby ghost, in adjacent cell
     if (not checkForOpenPosition((currCell[0]+1, currCell[1]), 1)):
         ghostPositionsNearby.append((currCell[0]+1, currCell[1]))
-    elif (not checkForOpenPosition((currCell[0]-1, currCell[1]), 1)):
+    if (not checkForOpenPosition((currCell[0]-1, currCell[1]), 1)):
         ghostPositionsNearby.append((currCell[0]-1, currCell[1]))
-    elif (not checkForOpenPosition((currCell[0], currCell[1]-1), 1)):
+    if (not checkForOpenPosition((currCell[0], currCell[1]-1), 1)):
         ghostPositionsNearby.append((currCell[0], currCell[1]-1))
-    elif (not checkForOpenPosition((currCell[0], currCell[1]+1), 1)):
+    if (not checkForOpenPosition((currCell[0], currCell[1]+1), 1)):
         ghostPositionsNearby.append((currCell[0], currCell[1]+1))
     return ghostPositionsNearby
 
@@ -860,19 +860,27 @@ def agentFourTraversal():
             if strike==1:
                 print('Strike 1')
                 a4GhostPositionNearby = checkAdjacentCoordinatesForGhost(a4)    # List of ghost coordinates at adjacent cells
-                if a4GhostPositionNearby != []:         # If there is a ghost in adjacent cell, agent moves
+                if a4GhostPositionNearby != []:         # If there is a ghost in adjacent cell, will enter this if condition to check where agent should move
                     a4AllowedDirections = [1,2,3,4]
                     invalidDirections = getInvalidAdjacentDirectionsToGoTo(a4)      # Get list of invalid adjacent directions, which will lead to agent going out of environment
                     print('invalidDirections : '+str(invalidDirections))
                     for i in invalidDirections:
                         print('Removing value '+str(i)+' from a4AllowedDirections '+str(a4AllowedDirections))
                         a4AllowedDirections.remove(i)
-                    print('a4GhostPositionNearby : '+str(a4GhostPositionNearby))
-                    placeholderA4AllowedDirections = a4AllowedDirections[:]
-                    for i in placeholderA4AllowedDirections:
+                    print('a4GhostPositionNearby : '+str(a4GhostPositionNearby))       # Will remove cell coordinates/directions which will take the agent nearer to the ghost
+                    placeholdera4GhostPositionNearby = a4GhostPositionNearby[:]
+                    for i in placeholdera4GhostPositionNearby:
                         restrictedDirection = findDirection(a4, i)      # Got error TypeError: 'int' object is not subscriptable in findDirections. Is this needed as direction is known?
                         print('Removing restrictedDirection '+str(restrictedDirection) + ' from a4AllowedDirections')
                         a4AllowedDirections.remove(restrictedDirection)
+                    placeholderA4AllowedDirections = a4AllowedDirections[:]
+                    for i in placeholderA4AllowedDirections:             # To remove blocked cells from the list of directions that can be taken
+                        nextCell = getNextCoordinatesToMoveTo(a4, i)
+                        print('Checking direction '+str(i)+', checking nextCell '+str(nextCell)+ ' using checkForOpenPosition function')
+                        if (not checkForOpenPosition(nextCell)):        # checkForOpenPosition(nextCell) will return False if the cell is blocked.
+                            print('Removing direction '+str(i))
+                            a4AllowedDirections.remove(i)
+                            print('After removing, a4AllowedDirections list : '+str(a4AllowedDirections))
                     print('After removing all the invalid and adjacent ghost indices, a4AllowedDirections = '+str(a4AllowedDirections))
                     if a4AllowedDirections == []:       # Stay at same location as Allowed Direction from checks is 0
                         nextLocA4 = a4
@@ -978,8 +986,8 @@ if __name__=='__main__':
 
     
     # with open('a2Data1.csv', 'w', newline='') as file:
-    #     writer = csv.writer(file, delimiter=',')
-    #     writer.writerows(a2Data)
+    # writer = csv.writer(file, delimiter=',')
+    # writer.writerows(a2Data)
     
     # file.close()
 
@@ -992,23 +1000,30 @@ if __name__=='__main__':
 
     # Agent 4 Traversing
     nr_of_ghosts=1
-    # while True:                 # Loop to check till what number can the Agent survive
-    #     for i in range(1,5):
-    #         create_env()            # New Env everytime
-    #         agentFourReached = agentFourTraversal()       # Agent 1 Traversal path with A* Algorithm
-    #         print('Agent Four Reached : ' + str(agentFourReached))
-    #         if nr_of_ghosts in a1Survivability:         # Dictionary containing results of Agent 1's Traversal success
-    #             a4Survivability[nr_of_ghosts].append(agentFourReached)
-    #         else:
-    #             a4Survivability[nr_of_ghosts] = [agentFourReached]
-    #         print(my_grid)
-    #     print(a4Survivability)
-    #     if True not in a4Survivability[nr_of_ghosts]:       # Loop must break if Agent 1's survivability is no more.
-    #         break
-    #     if nr_of_ghosts>30:         # A check to limit how many times loop will go on, safety mechanism
-    #         break
-    #     nr_of_ghosts+=1
+    a4Data =[]
+    while True:                 # Loop to check till what number can the Agent survive
+        for i in range(1,5):
+            create_env()            # New Env everytime
+            startTime = time.time()
+            agentFourReached = agentFourTraversal()       # Agent 1 Traversal path with A* Algorithm
+            print('Agent Four Reached : ' + str(agentFourReached))
+            if nr_of_ghosts in a4Survivability:         # Dictionary containing results of Agent 4's Traversal success
+                a4Survivability[nr_of_ghosts].append(agentFourReached)
+            else:
+                a4Survivability[nr_of_ghosts] = [agentFourReached]
+            print(my_grid)
+            print(a4Survivability)
+            a4DataLength = len(a4Survivability[nr_of_ghosts])
+            executionTime = time.time() - startTime
+            a4Data.append(["A4", i, nr_of_ghosts, agentFourReached, executionTime])
+        if True not in a4Survivability[nr_of_ghosts]:       # Loop must break if Agent 1's survivability is no more.
+            break
+        if nr_of_ghosts>5:         # A check to limit how many times loop will go on, safety mechanism
+            break
+        nr_of_ghosts+=1
 
-    # print('----------------- BFS Output -----------------')
-    # print(breadth_first_search(my_grid))
-    # aStar(my_grid)
+    with open('a4Data1.csv', 'w', newline='') as file:
+        writer = csv.writer(file, delimiter=',')
+        writer.writerows(a4Data)
+
+        # file.close()
