@@ -927,23 +927,30 @@ if __name__=='__main__':
     # print(my_grid)
 
     # Agent 1 Traversing
-    # nr_of_ghosts=1
-    # while True:                 # Loop to check till what number can the Agent survive
-    #     for i in range(1,5):
-    #         create_env()            # New Env everytime
-    #         agentOneReached = agentOneTraversal()       # Agent 1 Traversal path with A* Algorithm
-    #         print('Agent One Reached : ' + str(agentOneReached))
-    #         if nr_of_ghosts in a1Survivability:         # Dictionary containing results of Agent 1's Traversal success
-    #             a1Survivability[nr_of_ghosts].append(agentOneReached)
-    #         else:
-    #             a1Survivability[nr_of_ghosts] = [agentOneReached]
-    #         print(my_grid)
-    #     print(a1Survivability)
-    #     if True not in a1Survivability[nr_of_ghosts]:       # Loop must break if Agent 1's survivability is no more.
-    #         break
-    #     if nr_of_ghosts>30:         # A check to limit how many times loop will go on, safety mechanism
-    #         break
-    #     nr_of_ghosts+=1
+    nr_of_ghosts=78
+    a1Data =[]
+    while True:                 # Loop to check till what number can the Agent survive
+        for i in range(1,31):
+            create_env()            # New Env everytime
+            startTime = time.time()
+            agentOneReached = agentOneTraversal()       # Agent 1 Traversal path with A* Algorithm
+            print('Agent One Reached : ' + str(agentOneReached))
+            if nr_of_ghosts in a1Survivability:         # Dictionary containing results of Agent 1's Traversal success
+                a1Survivability[nr_of_ghosts].append(agentOneReached)
+            else:
+                a1Survivability[nr_of_ghosts] = [agentOneReached]
+            print(my_grid)
+            print(a1Survivability)
+            executionTime = time.time() - startTime
+            a1Data.append(["A1", i, nr_of_ghosts, agentOneReached, executionTime])
+        # if True not in a1Survivability[nr_of_ghosts]:       # Loop must break if Agent 1's survivability is no more.
+        #     break
+        if nr_of_ghosts>99:         # A check to limit how many times loop will go on, safety mechanism
+            break
+        nr_of_ghosts+=1
+    with open('a1Data2.csv', 'w', newline='') as file:
+        writer = csv.writer(file, delimiter=',')
+        writer.writerows(a1Data)
 
     #Metric:
     #AgentNo, RunNo, No. of ghosts, MazeNo, Win/Loss, Time, Future-(No. of steps)
@@ -992,38 +999,38 @@ if __name__=='__main__':
     # file.close()
 
 
-    # Agent 4 Code:
-    agentFourReached = agentFourTraversal()
-    print('Agent Four Reached : ' + str(agentFourReached))
-    print(my_grid)
-    print(a4PathTaken)
+    # # Agent 4 Code:
+    # agentFourReached = agentFourTraversal()
+    # print('Agent Four Reached : ' + str(agentFourReached))
+    # print(my_grid)
+    # print(a4PathTaken)
 
-    # Agent 4 Traversing
-    nr_of_ghosts=1
-    a4Data =[]
-    while True:                 # Loop to check till what number can the Agent survive
-        for i in range(1,31):
-            create_env()            # New Env everytime
-            startTime = time.time()
-            agentFourReached = agentFourTraversal()       # Agent 1 Traversal path with A* Algorithm
-            print('Agent Four Reached : ' + str(agentFourReached))
-            if nr_of_ghosts in a4Survivability:         # Dictionary containing results of Agent 4's Traversal success
-                a4Survivability[nr_of_ghosts].append(agentFourReached)
-            else:
-                a4Survivability[nr_of_ghosts] = [agentFourReached]
-            print(my_grid)
-            print(a4Survivability)
-            a4DataLength = len(a4Survivability[nr_of_ghosts])
-            executionTime = time.time() - startTime
-            a4Data.append(["A4", i, nr_of_ghosts, agentFourReached, executionTime])
-        # if True not in a4Survivability[nr_of_ghosts]:       # Loop must break if Agent 1's survivability is no more.
-        #     break
-        if nr_of_ghosts>100:         # A check to limit how many times loop will go on, safety mechanism
-            break
-        nr_of_ghosts+=1
+    # # Agent 4 Traversing
+    # nr_of_ghosts=102
+    # a4Data =[]
+    # while True:                 # Loop to check till what number can the Agent survive
+    #     for i in range(1,26):
+    #         create_env()            # New Env everytime
+    #         startTime = time.time()
+    #         agentFourReached = agentFourTraversal()       # Agent 1 Traversal path with A* Algorithm
+    #         print('Agent Four Reached : ' + str(agentFourReached))
+    #         if nr_of_ghosts in a4Survivability:         # Dictionary containing results of Agent 4's Traversal success
+    #             a4Survivability[nr_of_ghosts].append(agentFourReached)
+    #         else:
+    #             a4Survivability[nr_of_ghosts] = [agentFourReached]
+    #         print(my_grid)
+    #         print(a4Survivability)
+    #         a4DataLength = len(a4Survivability[nr_of_ghosts])
+    #         executionTime = time.time() - startTime
+    #         a4Data.append(["A4", i, nr_of_ghosts, agentFourReached, executionTime])
+    #     # if True not in a4Survivability[nr_of_ghosts]:       # Loop must break if Agent 1's survivability is no more.
+    #     #     break
+    #     if nr_of_ghosts>149:         # A check to limit how many times loop will go on, safety mechanism
+    #         break
+    #     nr_of_ghosts+=1
 
-    with open('a4Data1.csv', 'w', newline='') as file:
-        writer = csv.writer(file, delimiter=',')
-        writer.writerows(a4Data)
+    # with open('a4Data2.csv', 'w', newline='') as file:
+    #     writer = csv.writer(file, delimiter=',')
+    #     writer.writerows(a4Data)
 
         # file.close()
