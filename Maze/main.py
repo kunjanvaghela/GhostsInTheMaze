@@ -9,14 +9,18 @@ my_grid=[]              # To store grid, changes when ghost traverses will happe
 my_grid_original=[]     # To store original grid, with original position of ghosts
 invalid_indices=[]      # To store indices which are blocked, and where ghost cannot pop up
 grid_size=51            # Size of the grid
-nr_of_ghosts=33          # Number of the ghosts to conjure
+nr_of_ghosts=1          # Number of the ghosts to conjure
 start_pos = (0,0)
 final_pos = (grid_size-1, grid_size-1)
-a1Survivability=dict()
+a1Survivability = dict()
+a4Survivability = dict()
+a5Survivability = dict()
 getAwayFromGhostRunCheck = 0
 agent2PathAndMetric = dict()
 agent2For3 = dict()
 a2Mazes = dict()        #Dictionary with key as NoOfMazes, value as List of all mazes generated for Agent2
+a4PathTaken = []        # To check and compare path taken by Agent 4
+a5PathTaken = []
 
 # To create the grid
 def create_grid(grid_size, blocked_cell=0.28):
@@ -552,7 +556,7 @@ def ghostmovement(my_grid):
                     else: print('STAY @ CURRENT')#STAY -NO CHANGE IF WALL IS BLOCKED
     print('--------------------')        
 
-    print('GRID MOVEMENT',my_grid)
+    print('GRID MOVEMENT\n',my_grid)
 
     #MANAN-END
 
@@ -609,6 +613,7 @@ def getAwayFromGhost(currCell, nearestGhostPos):        # --> Returns tuple valu
         nextCell = getNextCoordinatesToMoveTo(currCell, direction)
         print('From valid Directions '+ str(direction) +' in getAwayFromGhost(), selected '+str(nextCell))
         return nextCell
+
 
     global getAwayFromGhostRunCheck
     if nearestGhostPos[0] == (currCell[0] + 1):     # Ghost is in down direction of Agent 2
@@ -773,10 +778,16 @@ def writeAg2MetricForAg3(mazeNo, nr_of_ghost, agent2Dict, outputFileName):
     file.close()
 
 def checkForOpenPosition(cellToCheck, onlyGhostChecks = 0):             # Returns True if the passed cell is unblocked (that is does not contain ghosts or ghost in blocked cell)
+    # onlyGhostChecks values denote:
+        # 0: Returns True only if the cellToCheck is not open (that is it must not have ghost, and also must not be blocked)
+        # 1: Returns True only if the cellToCheck does not have ghosts (including ghosts in blocked cells)
+        # 2: Returns True only if the cellToCheck does not have ghosts which are present in unblocked cells (ghosts in blocked cells will be ignored)
     if (cellToCheck[0] >=0 and cellToCheck[0] < grid_size) and (cellToCheck[1] >=0 and cellToCheck[1] <grid_size):
         if (my_grid[cellToCheck[0],cellToCheck[1]] != 0) and onlyGhostChecks == 0:
             return False
         elif (my_grid[cellToCheck[0],cellToCheck[1]] < 0) and onlyGhostChecks == 1:
+            return False
+        elif (my_grid[cellToCheck[0],cellToCheck[1]] %10 != 0 and my_grid[cellToCheck[0],cellToCheck[1]] != 1) and onlyGhostChecks == 2:
             return False
     return True         # To return True if passed cell is invalid, like if it lies outside the boundary of matrix. This cell will not have ghost.
 
@@ -793,6 +804,23 @@ def checkOpenCellsForAgentFour(currPosition, determinedPath, visibility):       
             elif (not checkForOpenPosition((nextPosition[0], nextPosition[1]-1), 1)):
                 return True
             elif (not checkForOpenPosition((nextPosition[0], nextPosition[1]+1), 1)):
+                return True
+            currPosition = nextPosition
+    return False
+
+def checkOpenCellsForAgentFive(currPosition, determinedPath, visibility):       # Checks if there are any ghosts in determinedPath till next visibility path (+1 more depth)
+    for i in range(visibility):
+        if currPosition in determinedPath:
+            nextPosition = determinedPath[currPosition]
+            if (not checkForOpenPosition(nextPosition, 2)):
+                return True
+            elif (not checkForOpenPosition((nextPosition[0]+1, nextPosition[1]), 2)):
+                return True
+            elif (not checkForOpenPosition((nextPosition[0]-1, nextPosition[1]), 2)):
+                return True
+            elif (not checkForOpenPosition((nextPosition[0], nextPosition[1]-1), 2)):
+                return True
+            elif (not checkForOpenPosition((nextPosition[0], nextPosition[1]+1), 2)):
                 return True
             currPosition = nextPosition
     return False
@@ -975,6 +1003,202 @@ def agent3Traversal(nr_of_ghosts):
     # return True
 
 
+def agentFourTraversal():
+    global a4PathTaken
+    a4 = start_pos          # Agent 1 coordinates denoted by this variable
+    nearestGhostPosition = tuple()
+    aStarPathDetermined = aStar(my_grid, 0, a4[0], a4[1])       # A Star path search without considering the ghost to get the shortest path possible to the end
+    print('aStarPathDetermined for Agent 4 : '+str(aStarPathDetermined))
+    strike, visibility = 0, 3
+    while (a4 != final_pos):
+        # Can move Agent 4 movement after ghost movement?
+        # Check if any ghost is present in aStar's Visibility (+ 1 more depth) cells
+        print('Current Agent Position : '+str(a4))
+        if a4 in aStarPathDetermined:
+            nextLocA4 = aStarPathDetermined[a4]
+        else:
+            aStarPathDetermined = aStar(my_grid, 0, a4[0], a4[1])       # A Star path search without considering the ghost to get the shortest path possible to the end
+            nextLocA4 = aStarPathDetermined[a4]
+        ghostPresentNearVisibility = checkOpenCellsForAgentFour(a4, aStarPathDetermined, visibility)
+        if ghostPresentNearVisibility:
+            print('Ghost in Visibility')
+            strike += 1
+            if strike==1:
+                print('Strike 1')
+                a4GhostPositionNearby = checkAdjacentCoordinatesForGhost(a4)    # List of ghost coordinates at adjacent cells
+                if a4GhostPositionNearby != []:         # If there is a ghost in adjacent cell, will enter this if condition to check where agent should move
+                    a4AllowedDirections = [1,2,3,4]
+                    invalidDirections = getInvalidAdjacentDirectionsToGoTo(a4)      # Get list of invalid adjacent directions, which will lead to agent going out of environment
+                    print('invalidDirections : '+str(invalidDirections))
+                    for i in invalidDirections:
+                        print('Removing value '+str(i)+' from a4AllowedDirections '+str(a4AllowedDirections))
+                        a4AllowedDirections.remove(i)
+                    print('a4GhostPositionNearby : '+str(a4GhostPositionNearby))       # Will remove cell coordinates/directions which will take the agent nearer to the ghost
+                    placeholdera4GhostPositionNearby = a4GhostPositionNearby[:]
+                    for i in placeholdera4GhostPositionNearby:
+                        restrictedDirection = findDirection(a4, i)      # Got error TypeError: 'int' object is not subscriptable in findDirections. Is this needed as direction is known?
+                        print('Removing restrictedDirection '+str(restrictedDirection) + ' from a4AllowedDirections')
+                        a4AllowedDirections.remove(restrictedDirection)
+                    placeholderA4AllowedDirections = a4AllowedDirections[:]
+                    for i in placeholderA4AllowedDirections:             # To remove blocked cells from the list of directions that can be taken
+                        nextCell = getNextCoordinatesToMoveTo(a4, i)
+                        print('Checking direction '+str(i)+', checking nextCell '+str(nextCell)+ ' using checkForOpenPosition function')
+                        if (not checkForOpenPosition(nextCell)):        # checkForOpenPosition(nextCell) will return False if the cell is blocked.
+                            print('Removing direction '+str(i))
+                            a4AllowedDirections.remove(i)
+                            print('After removing, a4AllowedDirections list : '+str(a4AllowedDirections))
+                    print('After removing all the invalid and adjacent ghost indices, a4AllowedDirections = '+str(a4AllowedDirections))
+                    if a4AllowedDirections == []:       # Stay at same location as Allowed Direction from checks is 0
+                        nextLocA4 = a4
+                        print('Ghost is present in adjacent cell. After choices, Agent decided to stay : '+ str(nextLocA4))
+                    else:
+                        directionToMove = np.random.choice(a4AllowedDirections)
+                        nextLocA4 = getNextCoordinatesToMoveTo(a4, directionToMove)
+                        print('Ghost is present in adjacent cell. After choices, random direction to move to : '+ str(nextLocA4))
+                else:
+                    nextLocA4 = a4          # Stay at same position as ghost is not at immediate next step. Ghost can go away to another direction
+                    print('Ghost is not present in adjacent cell. Agent waiting for ghost to move. Next position (must stay) : '+ str(nextLocA4))
+            else:
+                #Move away from the AStar path
+                nextLocA4 = getAwayFromGhost(a4, nextLocA4)
+                print('Strike 2. getAwayFromGhost encountered. Next Loc : '+str(nextLocA4))
+        else:
+            strike = 0
+            nextLocA4 = aStarPathDetermined[a4]
+            print('Since no ghost in visibility. Agent will go on with AStar path. NextLoc : '+str(nextLocA4))
+        print(nextLocA4)
+        if my_grid[nextLocA4] == 1:
+            print('Agent is in Blocked Cell. Some Serious Error !!!!!!!!!!!!!!')
+        if my_grid[nextLocA4] != 0:
+            print('Agent not in Open Cell. Ghost Encountered ????????????')
+            print(my_grid[nextLocA4])
+            return False
+        print('A4 current location : '+str(a4)+'; A4 Next Location : '+str(nextLocA4))
+        a4 = nextLocA4
+        ghostmovement(my_grid)
+        a4PathTaken.append(a4)
+    return True
+
+def agentFourRun():
+    global my_grid
+
+def agentFiveTraversal():
+    global a5PathTaken
+    a5 = start_pos          # Agent 5 coordinates denoted by this variable, at the start in the beginning
+    aStarPathDetermined = aStar(my_grid, 0, a5[0], a5[1])       # A Star path search without considering the ghost to get the shortest path possible to the end
+    print('aStarPathDetermined for Agent 5 : '+str(aStarPathDetermined))
+    strike, visibility = 0, 3
+    while (a5 != final_pos):
+        # Can move Agent 5 movement after ghost movement?
+        # Check if any ghost is present in aStar's Visibility (+ 1 more depth) (this is based on length to check till denoted by variable Visibility) cells
+        print('Current Agent Position : '+str(a5))
+        if a5 in aStarPathDetermined:           # First need to check if AStar path lies from where Agent is currently positioned.
+            nextLocA5 = aStarPathDetermined[a5] # If AStar path lies, will consider the next step as per AStar for traversal.
+        else:               # If no AStar path found on current coordinate, A Star search is again done to get new coordinates.
+            aStarPathDetermined = aStar(my_grid, 0, a5[0], a5[1])       # A Star path search without considering the ghost to get the shortest path possible to the end
+            nextLocA5 = aStarPathDetermined[a5]                 # Next coordinate taken from New AStar path
+        ghostPresentNearVisibility = checkOpenCellsForAgentFive(a5, aStarPathDetermined, visibility)    # Fetches if there are any ghost (only in unblocked cells, blocked cells will be ignored) till Visibility length (+1 more depth) when AStar path is followed
+        if ghostPresentNearVisibility:          # If ghost present in the AStar path (or in the next coordinate of the AStar path)
+            print('Ghost in Visibility')
+            strike += 1             # Increments to showcase that Ghost is still in path, even in next iteration
+            if strike==1:           # If ghost came into the path in this iteration only, strike will be 1
+                print('Strike 1')
+                a5GhostPositionNearby = checkAdjacentCoordinatesForGhost(a5)    # Since not moving is an option, agent needs list of ghost coordinates at adjacent cells to know the risk
+                if a5GhostPositionNearby != []:         # If there is a ghost in adjacent cell, will enter this if condition to check where agent should move
+                    a5AllowedDirections = [1,2,3,4]     # Initiated a direction list, invalid or blocked directions will be removed from this list.
+                    invalidDirections = getInvalidAdjacentDirectionsToGoTo(a5)      # Gets list of invalid adjacent directions, which will lead to agent going out of environment
+                    print('invalidDirections : '+str(invalidDirections))
+                    for i in invalidDirections:
+                        print('Removing value '+str(i)+' from a5AllowedDirections '+str(a5AllowedDirections))
+                        a5AllowedDirections.remove(i)       # Removes invalid directions from allowed directions for the agent from current position
+                    print('a5GhostPositionNearby : '+str(a5GhostPositionNearby))
+                    placeholdera5GhostPositionNearby = a5GhostPositionNearby[:]         # To remove cell coordinates/directions which will take the agent nearer to the ghost
+                    for i in placeholdera5GhostPositionNearby:
+                        restrictedDirection = findDirection(a5, i)      # Got error TypeError: 'int' object is not subscriptable in findDirections. Is this needed as direction is known?
+                        print('Removing restrictedDirection '+str(restrictedDirection) + ' from a5AllowedDirections')
+                        a5AllowedDirections.remove(restrictedDirection)         # Removed directions where ghost is present in the immediate cell
+                    placeholderA5AllowedDirections = a5AllowedDirections[:]
+                    for i in placeholderA5AllowedDirections:             # To remove blocked cells from the list of directions that can be taken
+                        nextCell = getNextCoordinatesToMoveTo(a5, i)
+                        print('Checking direction '+str(i)+', checking nextCell '+str(nextCell)+ ' using checkForOpenPosition function')
+                        if (not checkForOpenPosition(nextCell)):        # checkForOpenPosition(nextCell) will return False if the cell is blocked.
+                            print('Removing direction '+str(i))
+                            a5AllowedDirections.remove(i)               # This will remove the direction of blocked cells directions from allowed directions for the agent
+                            print('After removing, a5AllowedDirections list : '+str(a5AllowedDirections))
+                    print('After removing all the invalid and adjacent ghost indices, a5AllowedDirections = '+str(a5AllowedDirections))
+                    if a5AllowedDirections == []:       # Stay at same location as Allowed Direction as all the other directions are blocked and possibly the only direction(s) open will lead to the ghost 
+                        nextLocA5 = a5
+                        print('Ghost is present in adjacent cell. After choices, Agent decided to stay : '+ str(nextLocA5))
+                    else:
+                        directionToMove = np.random.choice(a5AllowedDirections)     # If there is a direction that agent can move in, direction to move will be taken randomly from those directions
+                        nextLocA5 = getNextCoordinatesToMoveTo(a5, directionToMove)
+                        print('Ghost is present in adjacent cell. After choices, random direction to move to : '+ str(nextLocA5))
+                else:
+                    nextLocA5 = a5          # Stay at same position as ghost is not at immediate next step. Ghost can go away to another direction
+                    print('Ghost is not present in adjacent cell. Agent waiting for ghost to move. Next position (must stay) : '+ str(nextLocA5))
+            else:
+                # Since ghost is in the path, and it is still travelling in/near the AStar path, Agent chooses to move away from the ghost
+                nextLocA5 = getAwayFromGhost(a5, nextLocA5)         # Returns coordinates that Agent can move to in order to get away from the ghost
+                print('Strike 2. getAwayFromGhost encountered. Next Loc : '+str(nextLocA5))
+        else:
+            strike = 0
+            nextLocA5 = aStarPathDetermined[a5]     # Since there are no ghost in vicinity, agent follows current AStar path
+            print('Since no ghost in visibility. Agent will go on with AStar path. NextLoc : '+str(nextLocA5))
+        print(nextLocA5)
+        if my_grid[nextLocA5] == 1:         # Check to debug, ignore!
+            print('Agent is in Blocked Cell. Some Serious Error !!!!!!!!!!!!!!')
+        if my_grid[nextLocA5] != 0:         # Agent is not in Open cell, agent died!!
+            print('Agent not in Open Cell. Ghost Encountered ????????????')
+            print(my_grid[nextLocA5])
+            return False
+        print('A5 current location : '+str(a5)+'; A5 Next Location : '+str(nextLocA5))
+        a5 = nextLocA5
+        ghostmovement(my_grid)          # Instantiates ghost movement
+        a5PathTaken.append(a5)
+    return True
+
+def agentFiveRun():
+    global my_grid, a5Survivability
+    
+# nearestGhostPosition = tuple()
+# while (a3 != final_pos):
+#     aStarPathDetermined = aStar(my_grid, 1, a2[0], a2[1])
+#     print('aStarPathDetermined for Agent 2 : '+str(aStarPathDetermined))
+#     # Can move Agent 2 movement after ghost movement?
+#     if len(aStarPathDetermined) == 0:
+#         print('A Star path not present. Need to check for nearest ghost')
+#         nearestGhostPath = breadth_first_search(my_grid, 1, a2[0], a2[1])       # Returns list of path to ghost
+#         print('nearestGhostPath : ' + str(nearestGhostPath))
+#         if len(nearestGhostPath) == 1:
+#             return False
+#         nearestGhostPosition = nearestGhostPath[1]      # Checking the second path element
+#         print('nearestGhostPosition : ')
+#         print(nearestGhostPosition)
+#         nextLocA2 = getAwayFromGhost(a2, nearestGhostPosition)      # Passes current Agent 2 location and the next Path that Agent will have to take to get to the nearest ghost
+#         if not nextLocA2 or my_grid[nextLocA2[0],nextLocA2[1]] < 0:
+#             print('Agent is in Blocked Cell. Some Serious Error !!!!!!!!!!!!!!')
+#             return False
+#     else:
+#         nextLocA2 = aStarPathDetermined[a2]
+#     # Storing data of Agent 2 in path
+#     currCellToNextCellDirection = findDirection(a2, nextLocA2)
+#     # if (a2[0], a2[1], currCellToNextCellDirection) in agent2PathAndMetric:
+#     agent2PathAndMetric[(a2[0], a2[1], currCellToNextCellDirection)] = False
+
+#     # Movement of ghost initiated
+#     ghostmovement(my_grid)
+#     print(nextLocA2)
+#     if my_grid[nextLocA2] == 1:
+#         print('Agent is in Blocked Cell. Some Serious Error !!!!!!!!!!!!!!')
+#     if my_grid[nextLocA2] != 0:
+#         print('Agent not in Open Cell. Ghost Encountered ????????????')
+#         print(my_grid[nextLocA2])
+#         return False
+#     a2 = nextLocA2
+#     print(my_grid)
+#     # break
+# return True
+
 
 if __name__=='__main__':
     create_env()
@@ -1007,8 +1231,10 @@ if __name__=='__main__':
     #         break
     #     nr_of_ghosts+=1
 
-    # #Metric:
-    # #AgentNo, RunNo, No. of ghosts, MazeNo, Win/Loss, Time, Future-(No. of steps)
+    #Metric:
+    #AgentNo, RunNo, No. of ghosts, MazeNo, Win/Loss, Time, Future-(No. of steps)
+    
+    # Agent 2
     # a2Survivability = {}
     # a2Data = []
     # a2RunNo = 1
@@ -1046,11 +1272,12 @@ if __name__=='__main__':
 
     
     # with open('a2Data1.csv', 'w', newline='') as file:
-    #     writer = csv.writer(file, delimiter=',')
-    #     writer.writerows(a2Data)
+    # writer = csv.writer(file, delimiter=',')
+    # writer.writerows(a2Data)
     
     # file.close()
 
+    # Agent 3
     #Metric:
     #AgentNo, No. of ghosts, Win/Loss, Time, Future-(No. of steps)
     a3Survivability = {}
@@ -1094,6 +1321,73 @@ if __name__=='__main__':
     # agent3Reached = agent3Traversal(1)
     # print(agent3Reached)
 
-    # print('----------------- BFS Output -----------------')
-    # print(breadth_first_search(my_grid))
-    # aStar(my_grid)
+
+
+
+    # Agent 4 Code:
+    # agentFourReached = agentFourTraversal()
+    # print('Agent Four Reached : ' + str(agentFourReached))
+    # print(my_grid)
+    # print(a4PathTaken)
+
+    # nr_of_ghosts=1
+    # a4Data =[]
+    # while True:                 # Loop to check till what number can the Agent survive
+    #     for i in range(1,5):
+    #         create_env()            # New Env everytime
+    #         startTime = time.time()
+    #         agentFourReached = agentFourTraversal()       # Agent 1 Traversal path with A* Algorithm
+    #         print('Agent Four Reached : ' + str(agentFourReached))
+    #         if nr_of_ghosts in a4Survivability:         # Dictionary containing results of Agent 4's Traversal success
+    #             a4Survivability[nr_of_ghosts].append(agentFourReached)
+    #         else:
+    #             a4Survivability[nr_of_ghosts] = [agentFourReached]
+    #         print(my_grid)
+    #         print(a4Survivability)
+    #         a4DataLength = len(a4Survivability[nr_of_ghosts])
+    #         executionTime = time.time() - startTime
+    #         a4Data.append(["A4", i, nr_of_ghosts, agentFourReached, executionTime])
+    #     if True not in a4Survivability[nr_of_ghosts]:       # Loop must break if Agent 1's survivability is no more.
+    #         break
+    #     if nr_of_ghosts>5:         # A check to limit how many times loop will go on, safety mechanism
+    #         break
+    #     nr_of_ghosts+=1
+
+    # with open('a4Data1.csv', 'w', newline='') as file:
+    #     writer = csv.writer(file, delimiter=',')
+    #     writer.writerows(a4Data)
+
+    # agentFourRun()
+
+
+
+    agentFiveRun()
+
+    nr_of_ghosts=1
+    a5Data =[]
+    while True:                 # Loop to check till what number can the Agent survive
+        for i in range(1,10):
+            create_env()            # New Env everytime
+            startTime = time.time()
+            agentFiveReached = agentFiveTraversal()       # Agent 1 Traversal path with A* Algorithm
+            print('Agent Five Reached : ' + str(agentFiveReached))
+            if nr_of_ghosts in a5Survivability:         # Dictionary containing results of Agent 4's Traversal success
+                a5Survivability[nr_of_ghosts].append(agentFiveReached)
+            else:
+                a5Survivability[nr_of_ghosts] = [agentFiveReached]
+            print(my_grid)
+            print(a5Survivability)
+            a5DataLength = len(a5Survivability[nr_of_ghosts])
+            executionTime = time.time() - startTime
+            a5Data.append(["A5", i, nr_of_ghosts, agentFiveReached, executionTime])
+        # if True not in a5Survivability[nr_of_ghosts]:       # Loop must break if Agent 1's survivability is no more.
+        #     break
+        nr_of_ghosts+=1
+        if nr_of_ghosts>10:         # A check to limit how many times loop will go on, safety mechanism
+            break
+
+    with open('a5Data1.csv', 'w', newline='') as file:
+        writer = csv.writer(file, delimiter=',')
+        writer.writerows(a5Data)
+
+        # file.close()
