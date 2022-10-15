@@ -1094,7 +1094,7 @@ def agentFiveTraversal():
         ghostmovement(my_grid)          # Instantiates ghost movement
         a5PathTaken.append(a5)
     return True
-\
+
 def agentFiveRun():
     global my_grid, a5Survivability
     nr_of_ghosts=1
@@ -1173,12 +1173,12 @@ if __name__=='__main__':
     my_grid_original = my_grid                  # To have a backup of original grid
     # print('Copied above grid to my_grid_original :')
 
-    # agentOneRun()
+    agentOneRun()
 
-    # agentTwoRun()
+    agentTwoRun()
 
-    # agentThreeRun()
+    agentThreeRun()
 
-    # agentFourRun()
+    agentFourRun()
 
     agentFiveRun()
