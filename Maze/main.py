@@ -9,7 +9,7 @@ my_grid=[]              # To store grid, changes when ghost traverses will happe
 my_grid_original=[]     # To store original grid, with original position of ghosts
 invalid_indices=[]      # To store indices which are blocked, and where ghost cannot pop up
 grid_size=51            # Size of the grid
-nr_of_ghosts=1          # Number of the ghosts to conjure
+nr_of_ghosts=33          # Number of the ghosts to conjure
 start_pos = (0,0)
 final_pos = (grid_size-1, grid_size-1)
 a1Survivability=dict()
@@ -876,6 +876,7 @@ def agent3Traversal(nr_of_ghosts):
     #If no data for a given cell, run Agent 2's strategy only once.
     a3CellExplored = []
     while (a3 != final_pos):
+        print(a3)
         if a3 in a3CellExplored:
             aStarPathDetermined = aStar(my_grid, 0, a3[0], a3[1])
             nextCell = aStarPathDetermined[(a3[0],a3[1])]
@@ -903,6 +904,7 @@ def agent3Traversal(nr_of_ghosts):
             print("Allowed Directions "+ str(a3AllowedDirections))
             directionToTake = moveAsPerAgent2(nr_of_ghosts, start_pos, a3AllowedDirections)
             if directionToTake == -100:
+                print("no valid directions astar " + a3)
                 aStarPathDetermined = aStar(my_grid, 0, a3[0], a3[1])
                 nextCell = aStarPathDetermined[(a3[0],a3[1])]
                 if my_grid[nextCell[0]][nextCell[1]] != 0:
@@ -1074,15 +1076,20 @@ if __name__=='__main__':
 
         if True not in a3Survivability[nr_of_ghosts]:       # Loop must break if Agent 2's survivability is no more.
             break
-        if nr_of_ghosts>2:         # A check to limit how many times loop will go on, safety mechanism
+        if nr_of_ghosts>100:         # A check to limit how many times loop will go on, safety mechanism
             break
         nr_of_ghosts+=1
 
-    with open('a3Data1.csv', 'w', newline='') as file:
-        writer = csv.writer(file, delimiter=',')
-        writer.writerows(a3Data)
+        with open('a3DataTemp4.csv', 'w', newline='') as file:
+            writer = csv.writer(file, delimiter=',')
+            writer.writerows(a3Data)
+        file.close()
+
+    # with open('a3Data1.csv', 'w', newline='') as file:
+    #     writer = csv.writer(file, delimiter=',')
+    #     writer.writerows(a3Data)
     
-    file.close()
+    # file.close()
 
     # agent3Reached = agent3Traversal(1)
     # print(agent3Reached)
