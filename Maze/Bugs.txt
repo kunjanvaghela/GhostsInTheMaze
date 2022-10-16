@@ -1,5 +1,0 @@
-0.6_BFS_AStar_Merge:
-1. Need to check Ghost Movement more thoroughly:
-    a) Need to iterate for more than 1 ghost at one location.
-    b) Need to check blocked cell traversal logic (before and after) more thoroughly. 
-    b) Need to check if ghost moving conditions are totally right? Check comments marked with KV and 'Bug01'.
