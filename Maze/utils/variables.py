@@ -5,6 +5,7 @@ GRID_WIDTH = 20
 GRID_SIZE = 21
 
 # Maze object colors
+CLR_BACKGROUND = (0, 0, 0) # BLACK
 CLR_LINE = (255,255,255) # WHITE
 CLR_CURRCELL = (0, 255, 0) # GREEN
 CLR_EXPLORED = (0, 0, 255) # BLUE
@@ -14,4 +15,12 @@ ADJUSTER1 = 3 # For ghost image
 
 # Maze attributes
 AGENT_TYPE = 1
-GHOST_SIMULATION_NR = 5
+# MAX_GHOST = 5
+SIMULATIONS_PER_SETTING = 5
+
+# Font Settings
+FONT_NAME = "Arial"
+FONT_SIZE = 20
+FONT_COLOR = (255, 255, 255)      # BLUE
+FONT_BOLD = True
+FONT_ITALIC = False
