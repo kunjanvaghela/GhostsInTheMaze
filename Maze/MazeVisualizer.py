@@ -9,9 +9,7 @@ from agent import Agent
 # Maze Variables
 grid = []
 visited = []
-# stack = []
-# solution = []
-agent_type = 1
+agent_type = variables.AGENT_TYPE
 num_ghosts = variables.MIN_GHOST
 agentSurvivability = []
 
@@ -41,21 +39,33 @@ def simulation_stats():
 
 # Initialize Maze, Ghosts and Agent
 def init_maze_ghost_agent():
-    global maze, ghosts, path_determined, agent_position, RECT_CURRCELL
+    global maze, ghosts, agent, path_determined, agent_position, RECT_CURRCELL
     maze = Maze()
     ghosts = Ghosts(maze, num_ghosts=num_ghosts)
     agent = Agent(agent_type)
     if agent.get_agent_type() == 1:
         path_determined = agent.agent_one_traversal(maze)       # Agemt 1 Path
-        # print(path_determined)
         agent_position = (variables.START_X, variables.START_Y)
+    elif agent.get_agent_type() == 2:
+        agent_position = (variables.START_X, variables.START_Y)
+        path_determined = agent.agent_two_traversal(maze, agent_position)       # Agemt 2 Path
     RECT_CURRCELL = pygame.Rect(agent_position[0], agent_position[1], variables.GRID_WIDTH, variables.GRID_WIDTH)       # for Agent
 
 # build the gridd
-def build_grid(maze):       # Need to set maze grid, path_determined, agent, RECT_CURRCELL
+def build_grid():       # Need to set maze grid, path_determined, agent, RECT_CURRCELL
+    global agent, maze, path_determined
+
     screen.fill(variables.CLR_BACKGROUND)        # Coloring the bg black
     x, y, w = variables.START_X, variables.START_Y, variables.GRID_WIDTH
     env_grid = maze.get_my_grid()
+
+    # Agent based conditions
+    if agent.get_agent_type() == 1:
+        pass
+    elif agent.get_agent_type() == 2:
+        path_determined = agent.agent_two_traversal(maze, agent_position)
+        # agent_position = (variables.START_X, variables.START_Y)
+
     for i in range(variables.GRID_SIZE):            # To draw the lines
         x = w      # to start position
         y += w     # new row
@@ -90,18 +100,10 @@ def build_grid(maze):       # Need to set maze grid, path_determined, agent, REC
 
 
 init_maze_ghost_agent()
-build_grid(maze)
-print(maze.get_my_grid())
-
-
-# RECT_GHOST = IMG_GHOST.get_rect(topleft = (grid[0][0][0] + variables.ADJUSTER1, grid[0][0][1]))
-# pos_currcell_x = grid[10][4][0]
-# pos_currcell_y = grid[10][4][1]
-# RECT_CURRCELL = pygame.Rect(grid[10][4][0], grid[10][4][1], variables.GRID_WIDTH, variables.GRID_WIDTH)
 
 running = True
 simulation = True
-build_grid(maze)
+build_grid()
 while running:
     clock.tick(variables.FPS)
     for event in pygame.event.get():
@@ -128,7 +130,7 @@ while running:
         
         print(agent_position)
         agent_position = nextLocA1
-        build_grid(maze)     # Building the lines
+        build_grid()     # Building the lines
         simulation_stats()
         if agent_position == (variables.GRID_SIZE - 1, variables.GRID_SIZE - 1) or maze.my_grid[agent_position[0]][agent_position[1]] != 0:
             if maze.my_grid[agent_position[0]][agent_position[1]] != 0:
