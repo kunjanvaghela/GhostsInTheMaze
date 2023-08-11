@@ -14,8 +14,8 @@ CLR_WALL = (150, 75, 0) # BROWN
 ADJUSTER1 = 3 # For ghost image
 
 # Maze attributes
-AGENT_TYPE = 1
-MIN_GHOST = 1
+AGENT_TYPE = 2
+MIN_GHOST = 7
 SIMULATIONS_PER_SETTING = 5
 
 # Font Settings
@@ -27,4 +27,4 @@ FONT_ITALIC = False
 
 # Simulation Settings
 WAIT_TIME_AFTER_EACH_RESULT = 3
-FPS = 100
+FPS = 10

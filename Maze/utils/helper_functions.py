@@ -1,3 +1,6 @@
+import numpy as np
+from utils import variables
+
 
 # Returns direction of the nextCell from current cell in integers: L:1 U:2 D:3 R:4:
 def findDirection(currCell, nextCellPos):
@@ -17,11 +20,11 @@ def getInvalidAdjacentDirectionsToGoTo(currcell):
     directions=[]        # LUDR
     if currcell[0] == 0:           # Top line, so cant go Up
         directions.append(2)
-    if currcell[0] == (grid_size-1):    # Bottom line, so cant go Down
+    if currcell[0] == (variables.GRID_SIZE - 1):    # Bottom line, so cant go Down
         directions.append(3)
     if currcell[1] == 0:        # Left most line, so cant go left
         directions.append(1)
-    if currcell[1] == (grid_size-1):    # Right most line, so cant go right
+    if currcell[1] == (variables.GRID_SIZE - 1):    # Right most line, so cant go right
         directions.append(4)
     return directions
 
@@ -43,28 +46,28 @@ def getNextCoordinatesToMoveTo(currCell, direction):
 
 
 
-def checkAdjacentCoordinatesForGhost(currCell):
+def checkAdjacentCoordinatesForGhost(currCell, my_grid):
     # Checks if adjacent cells to the current cell contains ghost (and also blocked cells), if yes, returns the blocked positions
     ghostPositionsNearby = []           # This list will contain positions of the nearby ghost, in adjacent cell
-    if (not checkForOpenPosition((currCell[0]+1, currCell[1]), 1)):
+    if (not checkForOpenPosition((currCell[0]+1, currCell[1]), my_grid, 1)):
         ghostPositionsNearby.append((currCell[0]+1, currCell[1]))
-    if (not checkForOpenPosition((currCell[0]-1, currCell[1]), 1)):
+    if (not checkForOpenPosition((currCell[0]-1, currCell[1]), my_grid, 1)):
         ghostPositionsNearby.append((currCell[0]-1, currCell[1]))
-    if (not checkForOpenPosition((currCell[0], currCell[1]-1), 1)):
+    if (not checkForOpenPosition((currCell[0], currCell[1]-1), my_grid, 1)):
         ghostPositionsNearby.append((currCell[0], currCell[1]-1))
-    if (not checkForOpenPosition((currCell[0], currCell[1]+1), 1)):
+    if (not checkForOpenPosition((currCell[0], currCell[1]+1), my_grid, 1)):
         ghostPositionsNearby.append((currCell[0], currCell[1]+1))
     return ghostPositionsNearby
 
 
 
 
-def checkForOpenPosition(cellToCheck, visibility_level = 0):             # Returns True if the passed cell is unblocked
+def checkForOpenPosition(cellToCheck, my_grid, visibility_level = 0):             # Returns True if the passed cell is unblocked
     # visibility_level values denote:
         # 0: Returns True only if the cellToCheck is not open (that is it must not have ghost, and also must not be blocked)
         # 1: Returns True only if the cellToCheck does not have ghosts (including ghosts in blocked cells)
         # 2: Returns True only if the cellToCheck does not have ghosts which are present in unblocked cells (ghosts in blocked cells will be ignored)
-    if (cellToCheck[0] >=0 and cellToCheck[0] < grid_size) and (cellToCheck[1] >=0 and cellToCheck[1] <grid_size):
+    if (cellToCheck[0] >=0 and cellToCheck[0] < variables.GRID_SIZE) and (cellToCheck[1] >=0 and cellToCheck[1] < variables.GRID_SIZE):
         if (my_grid[cellToCheck[0],cellToCheck[1]] != 0) and visibility_level == 0:  # Checks if the current cell is Unblocked
             return False
         elif (my_grid[cellToCheck[0],cellToCheck[1]] < 0) and visibility_level == 1:  # Checks if the current cell does have ghost
@@ -74,38 +77,38 @@ def checkForOpenPosition(cellToCheck, visibility_level = 0):             # Retur
             return False
     return True   # To return True if passed cell is invalid, like if it lies outside the boundary of matrix. This cell will not have ghost.
 
-def checkOpenCellsForAgentFour(currPosition, determinedPath, visibility):
+def checkOpenCellsForAgentFour(currPosition, determinedPath, my_grid, visibility):
     # Checks if there are any ghosts in determinedPath till next visibility path (+1 more depth)
     for i in range(visibility):     # Iterates till visibility cell
         if currPosition in determinedPath:
             nextPosition = determinedPath[currPosition]     # Checks each adjacent cell from nextPosition for ghosts
-            if (not checkForOpenPosition(nextPosition, 1)):
+            if (not checkForOpenPosition(nextPosition, my_grid, 1)):
                 return True
-            elif (not checkForOpenPosition((nextPosition[0]+1, nextPosition[1]), 1)):
+            elif (not checkForOpenPosition((nextPosition[0]+1, nextPosition[1]), my_grid, 1)):
                 return True
-            elif (not checkForOpenPosition((nextPosition[0]-1, nextPosition[1]), 1)):
+            elif (not checkForOpenPosition((nextPosition[0]-1, nextPosition[1]), my_grid, 1)):
                 return True
-            elif (not checkForOpenPosition((nextPosition[0], nextPosition[1]-1), 1)):
+            elif (not checkForOpenPosition((nextPosition[0], nextPosition[1]-1), my_grid, 1)):
                 return True
-            elif (not checkForOpenPosition((nextPosition[0], nextPosition[1]+1), 1)):
+            elif (not checkForOpenPosition((nextPosition[0], nextPosition[1]+1), my_grid, 1)):
                 return True
             currPosition = nextPosition
     return False
 
-def checkOpenCellsForAgentFive(currPosition, determinedPath, visibility):
+def checkOpenCellsForAgentFive(currPosition, determinedPath, my_grid, visibility):
     # Checks if there are any ghosts in determinedPath till next visibility path (+1 more depth)
     for i in range(visibility):     # Iterates till visibility cell
         if currPosition in determinedPath:
             nextPosition = determinedPath[currPosition]     # Checks each adjacent cell from nextPosition for ghosts
             if (not checkForOpenPosition(nextPosition, 2)):
                 return True
-            elif (not checkForOpenPosition((nextPosition[0]+1, nextPosition[1]), 2)):
+            elif (not checkForOpenPosition((nextPosition[0]+1, nextPosition[1]), my_grid, 2)):
                 return True
-            elif (not checkForOpenPosition((nextPosition[0]-1, nextPosition[1]), 2)):
+            elif (not checkForOpenPosition((nextPosition[0]-1, nextPosition[1]), my_grid, 2)):
                 return True
-            elif (not checkForOpenPosition((nextPosition[0], nextPosition[1]-1), 2)):
+            elif (not checkForOpenPosition((nextPosition[0], nextPosition[1]-1), my_grid, 2)):
                 return True
-            elif (not checkForOpenPosition((nextPosition[0], nextPosition[1]+1), 2)):
+            elif (not checkForOpenPosition((nextPosition[0], nextPosition[1]+1), my_grid, 2)):
                 return True
             currPosition = nextPosition
     return False
@@ -115,7 +118,7 @@ def checkOpenCellsForAgentFive(currPosition, determinedPath, visibility):
 
 
 # Called when Agent needs to get away from the ghost. Receives current cell and coordinate which is nearest to the ghost cell
-def getAwayFromGhost(currCell, nearestGhostPos):        # --> Returns tuple value of nextPosition to take
+def getAwayFromGhost(currCell, nearestGhostPos, my_grid):        # --> Returns tuple value of nextPosition to take
     validDirections = [1,2,3,4]     # Listed valid directions, this will be removed if the direction is invalid
     invalidDirections = getInvalidAdjacentDirectionsToGoTo(currCell)            # Get the direction which point to cell outside of environment
     for i in invalidDirections:
@@ -125,7 +128,7 @@ def getAwayFromGhost(currCell, nearestGhostPos):        # --> Returns tuple valu
     placeholderForRemovingValidDirections = validDirections[:]      # Placeholder to modify the validDirections list
     for i in placeholderForRemovingValidDirections:             # To remove blocked cells from the list of directions that can be taken
         nextCell = getNextCoordinatesToMoveTo(currCell, i)      # Fetches coordinate of the cell passed based on the direction from current cell
-        if (not checkForOpenPosition(nextCell)):        # checkForOpenPosition(nextCell) will return False if the cell is blocked.
+        if (not checkForOpenPosition(nextCell, my_grid)):        # checkForOpenPosition(nextCell) will return False if the cell is blocked.
             validDirections.remove(i)                   # Direction pointing to the blocked cells will be removed
     if validDirections == []:
         # No valid direction available to run away from the ghost. Hence agent will stay at same cell

@@ -1,6 +1,7 @@
 from maze import Maze
 from utils import algorithms
 from utils import variables
+from utils import helper_functions
 
 class Agent(object):
     """docstring for Agent."""
@@ -20,41 +21,28 @@ class Agent(object):
     def agent_one_traversal(self, maze: Maze):
         return algorithms.a_star(maze.my_grid)
 
-    # def agentOneRun():
-    #     # Agent 1 Traversing
-    #     global my_grid
-    #     nr_of_ghosts=1
-    #     while True:                 # Loop to check till what number can the Agent survive
-    #         for i in range(1,5):
-    #             create_env()            # New Env everytime
-    #             agentOneReached = agentOneTraversal()       # Agent 1 Traversal path with A* Algorithm
-    #             print('Agent One Reached : ' + str(agentOneReached))
-    #             if nr_of_ghosts in a1Survivability:         # Dictionary containing results of Agent 1's Traversal success
-    #                 a1Survivability[nr_of_ghosts].append(agentOneReached)
-    #             else:
-    #                 a1Survivability[nr_of_ghosts] = [agentOneReached]
-    #             print(my_grid)
-    #         print(a1Survivability)
-    #         if True not in a1Survivability[nr_of_ghosts]:       # Loop must break if Agent 1's survivability is no more.
-    #             break
-    #         if nr_of_ghosts>10:         # A check to limit how many times loop will go on, safety mechanism
-    #             break
-    #         nr_of_ghosts+=1
-
-    # # Agent one traversal logic     -> Returns True if Agent 1 reaches the goal cell, and False if Agent 1 dies
-    # def agentOneTraversal():
-    #     a1 = start_pos          # Agent 1 coordinates denoted by this variable
-    #     # Agent One gets the shortest A Star path using Manhattan Distance heuristic, ignoring the ghosts.
-    #     aStarPathDetermined = a_star(my_grid)
-    #     # Agent One traverses in below while loop until either it reaches the ghost, or when Agent 1 gets in the same cell as ghost.
-    #     while (a1 != final_pos):
-    #         nextLocA1 = aStarPathDetermined[a1]
-    #         ghostmovement(my_grid)
-    #         # if my_grid[nextLocA1] == 1:
-    #         #     print('Agent is in Blocked Cell. Some Serious Error !!!!!!!!!!!!!!')
-    #         if my_grid[nextLocA1] != 0:
-    #             print('Agent not in Open Cell. Ghost Encountered!')
-    #             print(my_grid[nextLocA1])
-    #             return False
-    #         a1 = nextLocA1
-    #     return True
+    def agent_two_traversal(self, maze: Maze, agentPosition: (int, int)):
+        nearestGhostPosition = tuple()
+        my_grid = maze.get_my_grid()
+        aStarPathDetermined = algorithms.a_star(my_grid, 1, agentPosition[0], agentPosition[1])       # Agent 2 gets a new A Star path based on current location in each step, and checks a path which is free of ghost
+        if len(aStarPathDetermined) == 0:           # True if A Start path not present to goal node
+            if agentPosition == (variables.GRID_SIZE - 1, variables.GRID_SIZE - 1): return {agentPosition: agentPosition}
+            # Agent checks for the nearest ghost using BFS algorithm
+            nearestGhostPath = algorithms.breadth_first_search(my_grid, 1, agentPosition[0], agentPosition[1])       # Returns list of path to ghost
+            # If the nearestGhostPath returned does not contain next cell, below 'if' will be triggered. Acts as safety mechanism
+            if len(nearestGhostPath) == 1:        # Commented for Visualization
+                # return False
+                return {agentPosition: agentPosition}
+            nearestGhostPosition = nearestGhostPath[1]      # This will be the next cell from the agent's current cell
+            nextLocA2 = helper_functions.getAwayFromGhost(agentPosition, nearestGhostPosition, my_grid)      # Passes current Agent 2 location and the next Path that Agent will have to take to get to the nearest ghost
+            # if nextLocA2 == a2:   # Included to go towards ghost if there are no other paths present. Implemented this as Agent 2 cannot stay at same location
+            #     nextLocA2=nearestGhostPosition
+            path_to_take = {agentPosition: nextLocA2}
+            if not nextLocA2 or my_grid[nextLocA2[0],nextLocA2[1]] < 0: # Returns False if there is no path or if index is out of bounds
+                # return False
+                path_to_take = {agentPosition: agentPosition}
+        else:
+            # If A Star path is present without ghost in path, agent will follow the A Star path
+            # nextLocA2 = aStarPathDetermined[agentPosition]
+            path_to_take = aStarPathDetermined
+        return path_to_take
