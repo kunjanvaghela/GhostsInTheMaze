@@ -1,7 +1,7 @@
 # Maze Coordinates
 START_X = 0   # x coordinate, y coordinate, GRID_WIDTH of each cell, size of grid
 START_Y = 0
-GRID_WIDTH = 20
+GRID_WIDTH = 40
 GRID_SIZE = 21
 
 # Maze object colors
@@ -14,7 +14,7 @@ CLR_WALL = (150, 75, 0) # BROWN
 ADJUSTER1 = 3 # For ghost image
 
 # Maze attributes
-AGENT_TYPE = 2
+AGENT_TYPE = 1
 MIN_GHOST = 7
 SIMULATIONS_PER_SETTING = 5
 
@@ -27,4 +27,4 @@ FONT_ITALIC = False
 
 # Simulation Settings
 WAIT_TIME_AFTER_EACH_RESULT = 3
-FPS = 10
+FPS = 30
