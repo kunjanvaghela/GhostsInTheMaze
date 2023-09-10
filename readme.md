@@ -48,19 +48,13 @@ Agent # | Strategy Followed
 5 | **Plan with impaired sight** Agent 5 brings a unique twist. It operates under the constraint of losing sight of ghosts when they enter blocked cells. This agent primarily follows Agent 4's strategy with the unique constraint.
 
 
-
-## Features
-
-- Randomly generated mazes for a new challenge each time you play.
-- Multiple ghosts with unique movement patterns.
-- Simple and intuitive controls.
-- Engaging gameplay with the thrill of evading ghosts.
-
 ## Getting Started
 
 ### Prerequisites
 
-- Python 3.x: Make sure you have Python 3.x installed. You can download it from [python.org](https://www.python.org/downloads/).
+- Python 3.x
+- Numpy
+- Pygame (For visualization)
 
 ### Installation
 
@@ -82,7 +76,17 @@ Agent # | Strategy Followed
 
 ### Usage
 
-To start the game, run the following command:
+The MazeVisualizer.py file contains the code to visualize the maze simulation for the given agents. Below configurations can be changed in the variables.py file:
+
+Variable Name | Description
+ ------------ | ------------- 
+AGENT_TYPE | Agent type to visualize in the visualizer
+MIN_GHOST | Minimum ghosts to start the simulation with
+SIMULATIONS_PER_SETTING | The number of simulations for declaring survivability rate.
+FPS | Visualization setting for frames per second.
+WAIT_TIME_AFTER_EACH_RESULT | Nr of seconds to show the maze state after win/loss.
+
+To start the simulation, run the following command:
 ```
 python3 MazeVisualizer.py
 ```
