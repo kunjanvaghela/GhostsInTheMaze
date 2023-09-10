@@ -40,7 +40,8 @@ This is a maze game created using Python and the Pygame library. In this game, y
    ```
 
 2. Navigate to the project directory:
-    ```cd Maze```
+    ```
+    cd Maze
+    ```
 
 3. Install the required dependencies:
-    
