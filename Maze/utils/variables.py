@@ -1,7 +1,7 @@
 # Maze Coordinates
 START_X = 0   # x coordinate, y coordinate, GRID_WIDTH of each cell, size of grid
 START_Y = 0
-GRID_WIDTH = 20
+GRID_WIDTH = 40
 GRID_SIZE = 21
 
 # Maze object colors

@@ -24,7 +24,10 @@ pygame.display.set_caption("Ghosts in the Maze")
 clock = pygame.time.Clock()
 
 # Import images
-IMG_GHOST = pygame.image.load('Images/Ghost.jpeg').convert_alpha()
+IMG_GHOST = pygame.image.load('Images/Ghost.png').convert_alpha()
+IMG_GHOST = pygame.transform.scale(IMG_GHOST, (variables.GRID_WIDTH, variables.GRID_WIDTH))
+IMG_AGENT = pygame.image.load('Images/Agent.png').convert_alpha()
+IMG_AGENT = pygame.transform.scale(IMG_AGENT, (variables.GRID_WIDTH, variables.GRID_WIDTH))
 
 # Draw Text Function
 text_font = pygame.font.SysFont(name=variables.FONT_NAME, size=variables.FONT_SIZE, bold=variables.FONT_BOLD, italic=variables.FONT_ITALIC)
@@ -49,7 +52,8 @@ def init_maze_ghost_agent():
     elif agent.get_agent_type() == 2:
         agent_position = (variables.START_X, variables.START_Y)
         path_determined = agent.agent_two_traversal(maze, agent_position)       # Agemt 2 Path
-    RECT_CURRCELL = pygame.Rect(agent_position[0], agent_position[1], variables.GRID_WIDTH, variables.GRID_WIDTH)       # for Agent
+    # RECT_CURRCELL = pygame.Rect(agent_position[0], agent_position[1], variables.GRID_WIDTH, variables.GRID_WIDTH)       # for Agent
+    RECT_CURRCELL = IMG_AGENT.get_rect(topleft = (agent_position[0], agent_position[1]))
 
 # build the gridd
 def build_grid():       # Need to set maze grid, path_determined, agent, RECT_CURRCELL
@@ -81,7 +85,8 @@ def build_grid():       # Need to set maze grid, path_determined, agent, RECT_CU
                 pygame.draw.rect(screen, variables.CLR_PATH, RECT_PATH)
             # Putting ghosts
             if (env_grid[i][j] < 0):
-                RECT_GHOST = IMG_GHOST.get_rect(topleft = (x + variables.ADJUSTER1, y))
+                # RECT_GHOST = IMG_GHOST.get_rect(topleft = (x + variables.ADJUSTER1, y))
+                RECT_GHOST = IMG_GHOST.get_rect(topleft = (x, y))
                 screen.blit(IMG_GHOST, RECT_GHOST)
             # Drawing the walls
             pygame.draw.line(screen, variables.CLR_LINE, [x, y], [x+w, y])   # Cell top
@@ -96,7 +101,8 @@ def build_grid():       # Need to set maze grid, path_determined, agent, RECT_CU
     # Drawing Agent
     RECT_CURRCELL.x = variables.GRID_WIDTH * agent_position[1] + variables.GRID_WIDTH
     RECT_CURRCELL.y = variables.GRID_WIDTH * agent_position[0] + variables.GRID_WIDTH
-    pygame.draw.rect(screen, variables.CLR_CURRCELL, RECT_CURRCELL)
+    # pygame.draw.rect(screen, variables.CLR_CURRCELL, RECT_CURRCELL)
+    screen.blit(IMG_AGENT, RECT_CURRCELL)
 
 
 init_maze_ghost_agent()
