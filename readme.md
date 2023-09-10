@@ -39,6 +39,11 @@ The maze is inhabited by multiple randomly spawned ghosts in the maze which can 
 ### 1.4 The Strategies
 Agent type and strategies implemented:
 
+First Header | Second Header 
+ ------------ | ------------- 
+Content from cell 1 | Content from cell 2 
+Content in the first column | content in the second column 
+
 Agent Nr | Strategy Followed
  ------------ | ------------- 
 Agent 1 | *Plan Once and Execute Blindly* : Possesses full knowledge of the blocked and unblocked cells in the maze and plans its entire path from source to destination at timestamp 0, completely disregarding the position of ghosts and their movements. This method results in a single, optimal plan executed without alterations and contigency plans in case ghost in encountered in between.
