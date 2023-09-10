@@ -40,6 +40,7 @@ The maze is inhabited by multiple randomly spawned ghosts in the maze which can 
 Agent type and strategies implemented:
 
 Agent Nr | Strategy Followed
+ ------------ | ------------- 
 Agent 1 | *Plan Once and Execute Blindly* : Possesses full knowledge of the blocked and unblocked cells in the maze and plans its entire path from source to destination at timestamp 0, completely disregarding the position of ghosts and their movements. This method results in a single, optimal plan executed without alterations and contigency plans in case ghost in encountered in between.
 Agent 2 | *Plan at Every step* The Agent plans its path at the 0th timestamp and then continually evaluates the ghost's position at each timestamp. Thus the Agent adapts its course dynamically, ensuring it avoids encountering ghosts if the ghost appears in its path to the goal.
 Agent 3 | *Forecasting on Agent 2’s knowledge* Relies on Agent 2's history data. When Agent 3 encounters a cell, it checks if Agent 2 has visited it before. If not, Agent 3 uses A* and mimics Agent 2's behavior. If the cell is unexplored, Agent 3 evaluates valid directions, selecting the one with maximum survivability. Explored cells prompt Agent 3 to mimic Agent 2 or stay put if no valid moves exist.
