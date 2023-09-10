@@ -36,5 +36,11 @@ This is a maze game created using Python and the Pygame library. In this game, y
 1. Clone the repository:
 
    ```bash
-   git clone https://github.com/your-username/maze-game.git
+   git clone https://github.com/kunjanvaghela/GhostsInTheMaze.git
    ```
+
+2. Navigate to the project directory:
+    ```cd Maze```
+
+3. Install the required dependencies:
+    
