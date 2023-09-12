@@ -1,17 +1,20 @@
 # Maze Game with Pygame
 
-![Gameplay Screenshot](screenshot.png)
+![Gameplay Screenshot](Maze/Images/Visualization.png)
 
 ## Table of Contents
 
 - [Introduction](#introduction)
-- [Features](#features)
+- [Implementation](#implementation)
+  - [The Environment](#the-environment)
+  - [The Agent](#the-agent)
+  - [The Problem: Ghosts](#the-problem-ghosts)
+  - [The Strategies](#the-strategies)
 - [Getting Started](#getting-started)
   - [Prerequisites](#prerequisites)
   - [Installation](#installation)
-- [Usage](#usage)
-- [Game Controls](#game-controls)
-- [Contributing](#contributing)
+  - [Usage](#usage)
+- [Analysis](#analysis)
 - [License](#license)
 
 ## Introduction
@@ -22,21 +25,34 @@ Welcome to the 'Ghost in the Maze' project. This project serves a dual purpose:
 
 This is achieved in an environment resembling a maze, with different agents designed to navigate through it, and collect data to analyze the agent's performance as it strives to reach its goal.
 
-## 1. Implementation
+## Implementation
 
-### 1.1 The Environment
+### The Environment
 
 The environment consists of a maze-like square grid, with some cells open (unblocked) and others obstructed (blocked). The agent can move through unblocked cells but cannot traverse blocked ones. To create varied test environments, mazes are generated randomly, with a 51x51 grid.
 
 The challenge lies in ensuring these mazes are navigable. DFS algorithm is used to verify the existence of paths from the upper left to the lower right corners before finalizing the randomly created maze as a valid environment.
 
-### 1.2 The Agent
+### The Agent
 The agent starts in the upper left corner and aims to reach the lower right corner. It can move in the cardinal directions (up, down, left, right) but only through unblocked squares. At any moment, the agent has complete knowledge of the entire maze, and hence can plan its path using it's strategy and updated maze information.
 
-### 1.3 The Problem: Ghosts
+### The Problem: Ghosts
 The maze is inhabited by multiple randomly spawned ghosts in the maze which can travel in cardinal directions and can tranverse through all the cells in the maze environment. The agent dies if a ghost encounters it. Ghosts move each time the agent does, which necessitates dynamic path planning by the agent to avoid collisions. Ghost picks any one of its adjacent cells, with probability of each cell of 25%. If the selected cell block is blocked, then there is a 50% probability that the agent will move towards it.
 
-### 1.4 The Strategies
+### The Strategies
+
+Following Search Algorithms were primarily used for the simulations:
+
+1. Depth First Search (DFS): 
+    - To validate if there exists a path from the start cell (0, 0) cell to the goal cell (rightmost and bottommost cell) upon creation of the maze.
+    - To check if each ghost spawned initially can be reached from the start node when the maze is created.
+    - DFS will not give the shortest path, but is highly efficient in this case for its quicker execution as compared to other similar algorithms, and we only need to find if a path exists from start node to the goal node.
+2. Breadth First Search (BFS):
+    - To get the position of the nearest ghost for an Agent. The direction is then used to run away from the ghost.
+    - BFS provides the shortest path in between two points. In this case, it is crucial to check the nearest ghost position, and hence BFS was selected as the most optimal algorithm for this task.
+3. A* (A Star):
+    - To determine 
+
 Agent type and strategies implemented:
 
 Agent # | Strategy Followed
@@ -69,10 +85,7 @@ Agent # | Strategy Followed
     cd Maze
     ```
 
-3. Install the required dependencies:
-    ```
-    pip install -r requirements.txt
-    ```
+3. Follow the below [Usage](#usage) section to details on how to use the code. 
 
 ### Usage
 
@@ -91,5 +104,45 @@ To start the simulation, run the following command:
 python3 MazeVisualizer.py
 ```
 
+Note: Folder 'InitialCode' contains the initial program merged into only 3 files. The functionality in this code contains all the functionality without the visualizer. The visualizer was implemented later to enhance the simulation finding with pygame module, and the new visualizer code is present in 'Maze' folder, which can be started using the 'MazeVisualizer.py' file.
+
+
+## Analysis
+
+The analysis delves into the survivability and efficiency of our maze-solving agents as they contend with an increasing number of ghosts. Each agent was run through multiple iterations, by increasing the number of ghosts until the agent survives at least once in the iterations performed.
+
+The results can be seen as follows:
+
+Agent | Survivability | Time
+ ------------ | ------------- | ------------
+1 | ![A1Survivability](Analysis/AGENTS/A1Survivability.png) | ![A1Survivability](Analysis/AGENTS/A1TimeAnalysis.png)
+2 | ![A1Survivability](Analysis/AGENTS/A2Survivability.png) | ![A1Survivability](Analysis/AGENTS/A2TimeAnalysis.png)
+3 | ![A1Survivability](Analysis/AGENTS/A3Survivability.png) | ![A1Survivability](Analysis/AGENTS/A3TimeAnalysis.png)
+4 | ![A1Survivability](Analysis/AGENTS/A4Survivability.png) | ![A1Survivability](Analysis/AGENTS/A4TimeAnalysis.png)
+5 | ![A1Survivability](Analysis/AGENTS/A5Survivability.png) | ![A1Survivability](Analysis/AGENTS/A5TimeAnalysis.png)
+
+This can be translated to:
+
+Agent | Average Survivability | Survivability Range | Average Survival Time
+ ------------ | ------------- | ------------ | ------------- 
+Agent 1 | 0.307 | 0.39, 0.326 | 0.188
+Agent 2 | 0.341 | 0.319, 0.364 | 58.238
+Agent 3 | 0.392 | 0.364, 0.42 | 0.23
+Agent 4 | 0.75 | 0.735, 0.765 | 1.83
+Agent 5 | 0.292 | 0.272, 0.311 | 0.369
+
+\* Survivability Range is considering 95% Values of Normal Distribution of Avg Survivability
+
+Average Survivability = Number of Success / Number of experiments
+
+Survivability Range: [Average Survivability - (1.96 / (2 * sqrt(N))), Average Survivability + (1.96 / (2 * sqrt(N)))]
+
+
 ## License
-This project is licensed under the MIT License - see the LICENSE file for details.
+Copyright 2023 Kunjan Vaghela
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the “Software”), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
