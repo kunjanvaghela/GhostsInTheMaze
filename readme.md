@@ -19,7 +19,7 @@
 
 ## Introduction
 
-Welcome to the 'Ghost in the Maze' project. This project serves a dual purpose:
+Welcome to the 'Ghosts in the Maze' project. This project serves a dual purpose:
 1. To provide a hands-on experience in implementing and using search algorithms to solve complex problems, and,
 2. to illustrate the distinction between planning and execution in uncertain environments.
 
@@ -39,29 +39,31 @@ The agent starts in the upper left corner and aims to reach the lower right corn
 ### The Problem: Ghosts
 The maze is inhabited by multiple randomly spawned ghosts in the maze which can travel in cardinal directions and can tranverse through all the cells in the maze environment. The agent dies if a ghost encounters it. Ghosts move each time the agent does, which necessitates dynamic path planning by the agent to avoid collisions. Ghost picks any one of its adjacent cells, with probability of each cell of 25%. If the selected cell block is blocked, then there is a 50% probability that the agent will move towards it.
 
-### The Strategies
+### Search Algorithms Utilized
 
-Following Search Algorithms were primarily used for the simulations:
+The simulations employed the following search algorithms to achieve various objectives:
 
 1. Depth First Search (DFS): 
-    - To validate if there exists a path from the start cell (0, 0) cell to the goal cell (rightmost and bottommost cell) upon creation of the maze.
-    - To check if each ghost spawned initially can be reached from the start node when the maze is created.
-    - DFS will not give the shortest path, but is highly efficient in this case for its quicker execution as compared to other similar algorithms, and we only need to find if a path exists from start node to the goal node.
+    - Validating the existence of a path from the starting cell (0, 0) to the goal cell (the rightmost and bottommost cell) during maze creation.
+    - Checking if each initially spawned ghost can be reached from the starting node when the maze is generated.
+    - _Why DFS:_ While DFS may not yield the shortest path, its efficiency shines in this context due to its speedy execution compared to similar algorithms. Our primary goal in these cases is to determine the existence of a path from the start node to the goal node.
 2. Breadth First Search (BFS):
-    - To get the position of the nearest ghost for an Agent. The direction is then used to run away from the ghost.
-    - BFS provides the shortest path in between two points. In this case, it is crucial to check the nearest ghost position, and hence BFS was selected as the most optimal algorithm for this task.
+    - Locating the position of the nearest ghost for an Agent. This information guides the Agent in evading the nearest ghost effectively.
+    - _Why BFS:_ BFS stands out in its ability to compute the shortest path between two points. Moreover, BFS systematically explores nodes/cells in increasing depth, making it ideal for pinpointing the nearest ghost from our Agent. In this context, where identifying the closest ghost's position is paramount, BFS emerges as the optimal algorithm for the task.
 3. A* (A Star):
-    - To determine 
+    - Calculation of an almost shortest path between any two specified positions, primarily used for finding a path from the Agent's current position to the Goal.
+    - The Manhattan Distance heuristic was applied to our A* algorithm.
+    - A* was favored over BFS for its quicker execution. While BFS offers the shortest path between two points, it consumes more execution time and memory than A*. Therefore, we made a trade-off for faster execution over the absolute shortest path.
 
-Agent type and strategies implemented:
+### Agent type and strategies implemented:
 
 Agent # | Strategy Followed
  ------------ | ------------- 
-1 | **Plan Once and Execute Blindly** : Possesses full knowledge of the blocked and unblocked cells in the maze and plans its entire path from source to destination at timestamp 0, completely disregarding the position of ghosts and their movements. This method results in a single, optimal plan executed without alterations and contigency plans in case ghost in encountered in between.
-2 | **Plan at Every step** The Agent plans its path at the 0th timestamp and then continually evaluates the ghost's position at each timestamp. Thus the Agent adapts its course dynamically, ensuring it avoids encountering ghosts if the ghost appears in its path to the goal.
-3 | **Forecasting on Agent 2’s knowledge** Relies on Agent 2's history data. When Agent 3 encounters a cell, it checks if Agent 2 has visited it before. If not, Agent 3 uses A* and mimics Agent 2's behavior. If the cell is unexplored, Agent 3 evaluates valid directions, selecting the one with maximum survivability. Explored cells prompt Agent 3 to mimic Agent 2 or stay put if no valid moves exist.
-4 | **Plan only when needed** Equipped with a dynamic strategy that adapts to the presence of ghosts based on the parameters _visibility_ and _strike_. _Visibility parameter_ defines how far the ghost can see. Until the agent encounters a ghost within this visibility range, it remains steadfast on its current path, optimizing efficiency. _Strike parameter_ is set to 1 when a ghost enters the visibility range of the agent. This acts as an early warning, alerting Agent that a ghost is lurking nearby. If in the next turn too the ghost remains in the visibility range, the Agent immediately changes its path to avoid potential danger.
-5 | **Plan with impaired sight** Agent 5 brings a unique twist. It operates under the constraint of losing sight of ghosts when they enter blocked cells. This agent primarily follows Agent 4's strategy with the unique constraint.
+1 | **Plan Once and Execute Blindly** : This Agent possesses full knowledge of the blocked and unblocked cells in the maze. It plans its entire path from source to destination at timestamp 0, disregarding the position of ghosts and their movements. This method results in a single, optimal plan executed without alterations or contingency plans in case a ghost is encountered en route.
+2 | **Plan at Every step** The Agent plans its path at timestamp 0 and continually evaluates the ghost's position at each timestamp. Thus, the Agent adapts its course dynamically, ensuring it avoids encountering ghosts if they appear in its path to the goal.
+3 | **Forecasting on Agent 2’s knowledge** This Agent relies on Agent 2's historical data. When Agent 3 encounters a cell, it checks if Agent 2 has visited it before. If not, Agent 3 uses A* and mimics Agent 2's behavior. If the cell is unexplored, Agent 3 evaluates valid directions, selecting the one with maximum survivability. Explored cells prompt Agent 3 to mimic Agent 2 or stay put if no valid moves exist.
+4 | **Plan only when needed** Equipped with a dynamic strategy that adapts to the presence of ghosts based on the parameters _visibility_ and _strike_. _Visibility parameter_ defines how far the agent will consider ghost as a threat. Until the agent encounters a ghost within this visibility range, it remains steadfast on its current path, optimizing efficiency. _Strike parameter_ is set to 1 when a ghost enters the visibility range of the agent. This acts as an early warning, alerting Agent that a ghost is lurking nearby. If in the next turn too the ghost remains in the visibility range, the Agent immediately changes its path to avoid potential danger.
+5 | **Plan with impaired sight** Agent 5 operates under the constraint of losing sight of ghosts when they enter blocked cells. This Agent primarily follows Agent 4's strategy but with the unique constraint. It adapts its path based on this restricted visibility.
 
 
 ## Getting Started
@@ -139,7 +141,7 @@ Survivability Range: [Average Survivability - (1.96 / (2 * sqrt(N))), Average Su
 
 
 ## License
-Copyright 2023 Kunjan Vaghela
+Copyright 2023 Kunjan Vaghela, Mitul Shah, Manan Shukla
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the “Software”), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 
