@@ -9,7 +9,8 @@
   - [The Environment](#the-environment)
   - [The Agent](#the-agent)
   - [The Problem: Ghosts](#the-problem-ghosts)
-  - [The Strategies](#the-strategies)
+  - [Search Algorithms Utilized](#search-algorithms-utilized)
+  - [Agent Type and Strategies Implemented](#agent-type-and-strategies-implemented)
 - [Getting Started](#getting-started)
   - [Prerequisites](#prerequisites)
   - [Installation](#installation)
@@ -55,7 +56,7 @@ The simulations employed the following search algorithms to achieve various obje
     - The Manhattan Distance heuristic was applied to our A* algorithm.
     - A* was favored over BFS for its quicker execution. While BFS offers the shortest path between two points, it consumes more execution time and memory than A*. Therefore, we made a trade-off for faster execution over the absolute shortest path.
 
-### Agent type and strategies implemented:
+### Agent Type and Strategies Implemented
 
 Agent # | Strategy Followed
  ------------ | ------------- 
