@@ -68,7 +68,7 @@ Agent # | Strategy Followed
 
 ### Prerequisites
 
-- Python 3.x
+- Python 3.x.x
 - Numpy
 - Pygame (For visualization)
 
